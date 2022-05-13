@@ -9,7 +9,10 @@
 .export wait_vblank
 .proc wait_vblank
 	PHA
+	LDA #$90
+	ORA camx
 	BIT PPUSTATUS
+	STA PPUCTRL
 	LDA #$00
 	STA PPUSCROLL
 	STA PPUSCROLL
@@ -52,6 +55,8 @@ wait:	LDA ready
 
 .export main
 .proc main
+	LDX #$00
+	STX camx
 	LDX PPUSTATUS
 	LDX #$3f
 	STX player_state
@@ -81,6 +86,8 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #>lv2
 	STA level+1
 	JSR lvextract
+	LDA #$01
+	STA camx
 
 	BIT PPUSTATUS
 	LDA #$27
@@ -265,6 +272,10 @@ maxt:
 
 .import lv1
 .import lv2
+
+.segment "BSS"
+camx: .res 1
+.export camx
 
 .segment "ZEROPAGE"
 ready: .res 1
