@@ -57,9 +57,9 @@ wait:	LDA ready
 .proc main
 	LDX #$00
 	STX camx
+	STX player_state
 	LDX PPUSTATUS
 	LDX #$3f
-	STX player_state
 	STX PPUADDR
 	LDX #$00
 	STX PPUADDR
@@ -253,15 +253,16 @@ exit_subr:
 .segment "RODATA"
 palettes:
 ; bgs
-.byte $21, $19, $17, $2B
-.byte $21, $1C, $32, $31
-.byte $1c, $0c, $30, $26
-.byte $1c, $0c, $30, $26
+.byte $21, $1B, $17, $29
+.byte $21, $1C, $32, $32
+.byte $21, $0C, $30, $27 ; sprite palette 1
+.byte $21, $0C, $32, $27 ; sprite palette 2
+;.byte $1D, $00, $10, $20 ; grey ramp
 ; sprites
-.byte $21, $0c, $30, $26
-.byte $1c, $0c, $30, $26
-.byte $1c, $0c, $30, $26
-.byte $1c, $0c, $30, $26
+.byte $21, $0c, $30, $27
+.byte $21, $0C, $32, $27
+.byte $1c, $0c, $30, $27
+.byte $1c, $0c, $30, $27
 
 sprites:
 .byte $70, $01, $00, $80
