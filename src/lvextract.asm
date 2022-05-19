@@ -1,12 +1,19 @@
 .include "constants.inc"
 
+.import init_player
+
 .import wait_vblank
 
+	;; lvextract
+	;; precondition: "level" contains the address of a level's data
+	;; postconditions:
+	;; * "level" is unchanged
+	;; * the pointed-to level has been drawn to the screen
 .export lvextract
 .proc lvextract
 	LDA #$24
 	STA write+1
-	LDA #$20
+	LDA #$40
 	STA write
 	LDA #$FF
 	STA currow
@@ -111,9 +118,32 @@ uin:	LDA lefts,Y
 	STA level+1
 	DEC tempi
 	BNE uout
+	;; put the level back where it was supposed to be
+	CLC
+	LDA level
+	ADC #$02
+	STA level
+	LDA level + 1
+	ADC #$00
+	STA level + 1
+	;; place player
+	LDY #$1C
+	LDA (level),Y
+	AND #$F0
+	ORA #$08
+	TAX
+	LDA (level),Y
+	ASL A
+	ASL A
+	ASL A
+	ASL A
+	ORA #$08
+	TAY
+	JSR init_player
 	RTS
 .endproc
 
+
 .proc rowread
 	;; prevrow = currow
 	LDA currow
@@ -251,7 +281,6 @@ rtlx2:	STY rights,X
 	DEX
 	ROL A
 	BNE rtl2
-	RTS
 .endproc
 
 .segment "RODATA"
@@ -261,6 +290,7 @@ lv1:
 .byte $0F, $E0, $00, $00, $80, $00, $00, $00
 .byte $0E, $00, $0E, $00, $00, $00, $80, $03
 .byte $FF, $03, $FF, $03
+.byte $1B
 
 .export lv2
 lv2:
@@ -268,6 +298,7 @@ lv2:
 .byte $0F, $80, $0C, $00, $0C, $00, $0C, $18
 .byte $00, $00, $00, $00, $01, $80, $01, $80
 .byte $01, $80, $F9, $8F
+.byte $0C ; player spawn (8,10)
 
 .segment "BSS"
 currow:  .res 2

@@ -24,17 +24,6 @@ clear_oam:
 	INX
 	BNE clear_oam
 
-	; initialize zero-page
-	LDA #$20
-	STA player_x
-	LDA #$d0
-	STA player_y
-	LDA #$01
-	STA player_tile
-	LDA maxt
-	STA timer
-	LDA #$01
-	STA player_dir
 	JMP main
 .endproc
 

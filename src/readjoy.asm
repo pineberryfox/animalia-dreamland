@@ -3,6 +3,8 @@
 .segment "CODE"
 .export readjoy
 .proc readjoy
+	LDA buttons
+	STA prevbuttons
 	LDA #$01
 	STA JOYPAD1
 	; enable the strobe bit, reading the first bit
@@ -17,6 +19,10 @@ loop:
 	BCC loop
 	RTS
 .endproc
+
+.segment "BSS"
+prevbuttons: .res 1
+.export prevbuttons
 
 .segment "ZEROPAGE"
 buttons: .res 1

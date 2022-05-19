@@ -17,3 +17,5 @@ BTN_UP     = $08
 BTN_DOWN   = $04
 BTN_LEFT   = $02
 BTN_RIGHT  = $01
+
+XSPEED = $20
