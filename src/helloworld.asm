@@ -64,7 +64,7 @@ wait:	LDA ready
 	LDX #$00
 	STX camx
 	;; friction: range between $06 and $45 :: rnd(0h3F)+6
-	LDX #$16
+	LDX #$0C
 	STX fric
 	LDX PPUSTATUS
 	LDX #$3f
@@ -84,7 +84,8 @@ vblankwait: ; wait for another vblank before continuing
 
 	LDA #%10010000 ; turn on NMIs, sprites use first pattern table
 	STA PPUCTRL
-	LDA #%00011110
+	LDA #$1E
+	;ORA #$20
 	STA PPUMASK
 
 	LDA #<lv1
@@ -102,6 +103,7 @@ vblankwait: ; wait for another vblank before continuing
 	STA PPUADDR
 	LDX #$40
 	LDA #%01010101
+	;LDA #$00
 wpal:	STA PPUDATA
 	DEX
 	BNE wpal

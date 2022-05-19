@@ -290,7 +290,7 @@ lv1:
 .byte $0F, $E0, $00, $00, $80, $00, $00, $00
 .byte $0E, $00, $0E, $00, $00, $00, $80, $03
 .byte $FF, $03, $FF, $03
-.byte $1B
+.byte $1B ; player spawn (1,11)
 
 .export lv2
 lv2:
