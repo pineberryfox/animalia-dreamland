@@ -1,5 +1,7 @@
 .include "constants.inc"
 
+.segment "CODE"
+
 	;; inputs:
 	;; * X: x-coordinate to check
 	;; * Y: y-coordinate to check

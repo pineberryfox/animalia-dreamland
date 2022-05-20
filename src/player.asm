@@ -1,5 +1,6 @@
 .include "constants.inc"
 
+.segment "CODE"
 	;; inputs:
 	;; * X: player spawn x coord
 	;; * Y: player spawn y coord
@@ -209,11 +210,11 @@ only1g: CLC
 	STA player_vy + 1
 
 	;; cap out at terminal velocity
-	CMP #$07
+	CMP #$0F
 	BMI next
 	LDA #$00
 	STA player_vy
-	LDA #$07
+	LDA #$0F
 	STA player_vy + 1
 next:	CLC
 	LDA player_suby
@@ -249,6 +250,8 @@ next:	CLC
 	BNE dcolld
 	JMP endCollV
 dcolld: LDA player_y
+	SEC
+	SBC #$08
 	AND #$F0
 	CLC
 	ADC #$08
@@ -259,7 +262,7 @@ dcolld: LDA player_y
 	STA player_vy + 1
 	LDA #$01
 	STA player_state
-	LDA #$04
+	LDA #$06
 	STA coyote ; ground happened, give coyote time
 	JMP endCollV
 collU:  ;; Going up
@@ -385,14 +388,14 @@ endhrz: CLC
 	ADC player_vx + 1
 	STA player_x
 	LDA player_x
-	CMP #$F8
+	CMP #$F7
 	BCC noredge
-	LDA #$F8
+	LDA #$F7
 	STA player_x
 	JMP vxTo0
-noredge:CMP #$08
+noredge:CMP #$09
 	BCS noxshunt
-	LDA #$08
+	LDA #$09
 	STA player_x
 vxTo0:	LDA #$00
 	STA player_vx

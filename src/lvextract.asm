@@ -1,7 +1,8 @@
 .include "constants.inc"
 
-.import init_player
+.segment "CODE"
 
+.import init_player
 .import wait_vblank
 
 	;; lvextract

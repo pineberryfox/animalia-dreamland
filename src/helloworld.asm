@@ -53,6 +53,8 @@ wait:	LDA ready
 .endproc
 
 .import lvextract
+.import rand
+.import srand
 .import readjoy
 .import reset_handler
 
@@ -63,9 +65,10 @@ wait:	LDA ready
 .proc main
 	LDX #$00
 	STX camx
-	;; friction: range between $06 and $45 :: rnd(0h3F)+6
-	LDX #$0C
-	STX fric
+	STX PPUMASK
+	LDY #$00
+	LDA #$00
+	JSR srand
 	LDX PPUSTATUS
 	LDX #$3f
 	STX PPUADDR
@@ -85,36 +88,69 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #%10010000 ; turn on NMIs, sprites use first pattern table
 	STA PPUCTRL
 	LDA #$1E
-	;ORA #$20
 	STA PPUMASK
 
 	LDA #<lv1
 	STA level
 	LDA #>lv1
 	STA level+1
+	JSR loadlevel
+
+mainloop:
+	JSR draw_player
+	JSR readjoy
+	JSR update_player
+	LDA #BTN_START
+	bit buttons
+	BEQ noload
+	JSR loadlevel
+noload: JSR wait_vblank
+	JMP mainloop
+.endproc
+
+.proc loadlevel
+	LDA #$00
+	STA camx
+	LDA #$0E
+	STA PPUMASK
 	JSR lvextract
+	LDA #$00
+	STA buttons
+	JSR update_player
+	JSR draw_player
 	LDA #$01
 	STA camx
+	JSR rand
+	AND #$3F
+	CLC
+	ADC #$06
+	STA fric
+	CMP #26
+	BPL summer
+	LDY #$55
+	LDA #$00
+	JMP season
+summer: LDY #$00
+	LDA #$20
+season: ORA #$1E
+	STA PPUMASK
 
+	;; this is where we should assign gravity and jump force
+
+	;; set palette accordingly
+	JSR wait_vblank
 	BIT PPUSTATUS
 	LDA #$27
 	STA PPUADDR
 	LDA #$C0
 	STA PPUADDR
 	LDX #$40
-	LDA #%01010101
-	;LDA #$00
-wpal:	STA PPUDATA
+wpal:	STY PPUDATA
 	DEX
 	BNE wpal
 	JSR wait_vblank
 
-mainloop:
-	JSR draw_player
-	JSR readjoy
-	JSR update_player
-	JSR wait_vblank
-	JMP mainloop
+	RTS
 .endproc
 
 .segment "VECTORS"
