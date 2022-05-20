@@ -28,26 +28,13 @@ wait:	LDA ready
 .proc nmi_handler
 	;; need push/pull?
 	PHA
-	TXA
-	PHA
-	TYA
-	PHA
 	;; pushed
 	LDA #$00
 	STA OAMADDR
 	LDA #$02
 	STA OAMDMA
-	BIT PPUSTATUS
-	LDA #$00
-	STA PPUSCROLL
-	LDA #$08
-	STA PPUSCROLL
 	INC ready
 	;; start pulling
-	PLA
-	TAY
-	PLA
-	TAX
 	PLA
 	RTI
 .endproc
