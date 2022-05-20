@@ -7,6 +7,8 @@
 .proc init_player
 	STX player_x
 	STY player_y
+	LDA #$40
+	STA grav
 	LDA #$08
 	STA player_base
 	LDA #$01
@@ -115,7 +117,27 @@ placed: ;; remember the camera is offset; account for that here
 	TYA
 	PHA
 
+	DEC jbuff
+	BPL norj
+	INC jbuff
+norj:   DEC coyote
+	BPL norc
+	INC coyote
+norc:
+
 	LDA player_state
+	CMP #$02
+	BNE state_not_jump
+	BIT player_vy + 1
+	BPL state_falling
+	LDA #$02
+	STA player_tile
+	JMP end_update_frame
+state_falling:
+	LDA #$06
+	STA player_tile
+	JMP end_update_frame
+state_not_jump:
 	BEQ end_update_frame
 	DEC timer
 	BNE end_update_frame
@@ -130,19 +152,68 @@ placed: ;; remember the camera is offset; account for that here
 	STA player_tile
 end_update_frame:
 
+	LDA prevbuttons
+	EOR #$FF
+	AND #(BTN_A | BTN_B)
+	BIT buttons
+	BEQ nojbutton
+	LDA #$04
+	STA jbuff ; buffer a jump for a few frames
+nojbutton:
+
+
+	LDA #$02
+	STA player_state ; jumping if nothing overrides
+	LDA jbuff
+	BEQ nojump
+	LDA coyote
+	BNE jumping
+	;; here we should check:
+	;; if a bird AND vy>=0 a "jump" is allowed,
+	;; but actually bird has a different jump,
+	;; so give that some thought
+	JMP nojump
+jumping:
+	LDA #$FA
+	STA player_vy + 1
+	LDA #$00
+	STA player_vy
+	STA jbuff
+	STA coyote
+nojump:
+
 	;; start vertical movement
+	LDA #(BTN_A | BTN_B)
+	BIT buttons
+	BNE only1g
 	CLC
 	LDA player_vy
-	ADC #$20
+	ADC grav
 	STA player_vy
 	LDA player_vy + 1
 	ADC #$00
 	STA player_vy + 1
-	CMP #$10
-	BCC next
-	LDA #$FF
+	CLC
+	LDA player_vy
+	ADC grav
 	STA player_vy
-	LDA #$0F
+	LDA player_vy + 1
+	ADC #$00
+	STA player_vy + 1
+only1g: CLC
+	LDA player_vy
+	ADC grav
+	STA player_vy
+	LDA player_vy + 1
+	ADC #$00
+	STA player_vy + 1
+
+	;; cap out at terminal velocity
+	CMP #$07
+	BMI next
+	LDA #$00
+	STA player_vy
+	LDA #$07
 	STA player_vy + 1
 next:	CLC
 	LDA player_suby
@@ -186,26 +257,24 @@ dcolld: LDA player_y
 	STA player_suby
 	STA player_vy
 	STA player_vy + 1
+	LDA #$01
+	STA player_state
+	LDA #$04
+	STA coyote ; ground happened, give coyote time
 	JMP endCollV
 collU:  ;; Going up
 	LDA player_x
 	SEC
 	SBC #$08
 	TAX
-	LDA player_y
-	SEC
-	SBC #$06
-	TAY
+	LDY player_y
 	JSR collide
 	BNE ucolld
 	LDA player_x
 	CLC
 	ADC #$07
 	TAX
-	LDA player_y
-	SEC
-	SBC #$06
-	TAY
+	LDY player_y
 	JSR collide
 	BNE ucolld
 	JMP endCollV
@@ -224,8 +293,6 @@ endCollV:
 	LDA #BTN_LEFT
 	BIT buttons
 	BEQ noleft
-	LDA #$01
-	STA player_state
 	LDA #$00
 	STA player_dir
 
@@ -253,7 +320,6 @@ noleft: LDA #BTN_RIGHT
 	BIT buttons
 	BEQ norght
 	LDA #$01
-	STA player_state
 	STA player_dir
 
 	CLC
@@ -275,10 +341,13 @@ rghted: LDA player_vx + 1
 rset:
 	JMP endhrz
 norght:
+	LDA player_state
+	CMP #$02
+	BEQ nongnd
 	LDA #$00
 	STA player_state
 	STA player_tile
-	LDA fric
+nongnd: LDA fric
 	LSR A
 	STA temp
 	BIT player_vx + 1
@@ -328,6 +397,7 @@ noredge:CMP #$08
 vxTo0:	LDA #$00
 	STA player_vx
 	STA player_vx + 1
+	STA player_subx
 noxshunt:
 
 	;; check x-collisions
@@ -348,10 +418,7 @@ noxshunt:
 	CLC
 	ADC #$08
 	TAX
-	LDA player_y
-	SEC
-	SBC #$04
-	TAY
+	LDY player_y
 	JSR collide
 	BNE rcolld
 	JMP endCollH
@@ -378,10 +445,7 @@ collL:  ;; Going left
 	SEC
 	SBC #$09
 	TAX
-	LDA player_y
-	SEC
-	SBC #$04
-	TAY
+	LDY player_y
 	JSR collide
 	BNE lcolld
 	JMP endCollH
@@ -419,7 +483,9 @@ player_suby: .res 1
 player_vx: .res 2
 player_vy: .res 2
 fric: .res 1
-.export fric
+grav: .res 1
+.export fric, grav
+.import prevbuttons
 
 .segment "ZEROPAGE"
 player_x: .res 1
