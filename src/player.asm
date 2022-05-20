@@ -8,8 +8,6 @@
 .proc init_player
 	STX player_x
 	STY player_y
-	LDA #$40
-	STA grav
 	LDA #$08
 	STA player_base
 	LDA #$01
@@ -23,6 +21,7 @@
 	STA player_vy + 1
 	STA player_subx
 	STA player_suby
+	STA player_overy
 	STA jbuff
 	STA coyote
 	LDA maxt
@@ -89,10 +88,12 @@ eitherway:
 
 placed: ;; remember the camera is offset; account for that here
 	LDA player_y
+	ORA player_overy
 	STA $0200
 	STA $0204
 	CLC
 	ADC #$08
+	ORA player_overy
 	STA $0208
 	STA $020C
 	LDA player_x
@@ -175,10 +176,11 @@ nojbutton:
 	;; so give that some thought
 	JMP nojump
 jumping:
-	LDA #$FA
+	LDA jumpforce
+	STA player_vy
+	LDA jumpforce + 1
 	STA player_vy + 1
 	LDA #$00
-	STA player_vy
 	STA jbuff
 	STA coyote
 nojump:
@@ -223,6 +225,14 @@ next:	CLC
 	LDA player_y
 	ADC player_vy + 1
 	STA player_y
+	LDA player_vy + 1
+	BMI vyup
+	LDA player_overy
+	ADC #$00
+	JMP vydone
+vyup:	LDA player_overy
+	ADC #$FF
+vydone: STA player_overy
 
 	;; check y-collisions
 	BIT player_vy + 1
@@ -483,11 +493,13 @@ coyote: .res 1
 jbuff: .res 1
 player_subx: .res 1
 player_suby: .res 1
+player_overy: .res 1
 player_vx: .res 2
 player_vy: .res 2
+jumpforce: .res 2
 fric: .res 1
 grav: .res 1
-.export fric, grav
+.export fric, grav, jumpforce
 .import prevbuttons
 
 .segment "ZEROPAGE"

@@ -120,6 +120,51 @@ noload: JSR wait_vblank
 	JSR draw_player
 	LDA #$01
 	STA camx
+
+	;; assign jump duration deltat and height deltay
+	JSR rand
+	AND #$1F
+	CLC
+	ADC #$40
+	STA deltay
+	STA dividend + 1
+
+	JSR rand
+	AND #$0F
+	CLC
+	ADC #$28
+	STA deltat
+	;; find initial vertical velocity: v0 = deltay / (4 deltat)
+	LSR A
+	LSR A
+	STA divisor
+	LDA #$00
+	STA dividend
+	JSR udiv16o8
+	;; gotta negate this
+	LDA dividend
+	EOR #$FF
+	STA jumpforce
+	LDA dividend + 1
+	EOR #$FF
+	STA jumpforce + 1
+	INC jumpforce
+	BNE noinc
+	INC jumpforce + 1
+noinc:
+	;; find gravity
+	LSR divisor
+	LDA #$00
+	STA dividend
+	LDA deltay
+	STA dividend + 1
+	JSR udiv16o8
+	LDA deltat
+	STA divisor
+	JSR udiv16o8
+	LDA dividend
+	STA grav
+
 	JSR rand
 	AND #$3F
 	CLC
@@ -134,9 +179,6 @@ summer: LDY #$00
 	LDA #$20
 season: ORA #$1E
 	STA PPUMASK
-
-	;; this is where we should assign gravity and jump force
-
 	;; set palette accordingly
 	JSR wait_vblank
 	BIT PPUSTATUS
@@ -150,6 +192,37 @@ wpal:	STY PPUDATA
 	BNE wpal
 	JSR wait_vblank
 
+	RTS
+.endproc
+
+	;; inputs:
+	;; * 16-bit little-endian value in dividend
+	;; * 8-bit divisor
+	;; outputs:
+	;; * 16-bit dividend/divisor in dividend
+	;; * 8-bit remainder in remainder
+	;; divisor remains unchanged
+.proc udiv16o8
+	LDA #$00
+	STA remainder
+	STA remainder + 1
+	LDX #$10
+lp:	ASL dividend
+	ROL dividend + 1
+	ROL remainder
+	ROL remainder + 1
+	LDA remainder
+	SEC
+	SBC divisor
+	TAY
+	LDA remainder + 1
+	SBC #$00
+	BCC cont
+	STA remainder + 1
+	STY remainder
+	INC dividend
+cont:   DEX
+	BNE lp
 	RTS
 .endproc
 
@@ -182,8 +255,13 @@ sprites:
 
 .segment "BSS"
 camx: .res 1
+deltat: .res 1
+deltay: .res 1
+remainder: .res 2
+dividend: .res 2
+divisor: .res 1
 .export camx
-.import fric
+.import fric, grav, jumpforce
 
 .segment "ZEROPAGE"
 ready: .res 1
