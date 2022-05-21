@@ -351,19 +351,19 @@ ucolld: LDA player_y
 	STA player_vy + 1
 endCollV:
 
+	;; if not grounded, use air friction
+	LDA fric
+	LDX coyote
+	BNE setef
+	LDA airfric
+setef:  STA efric
+
 	;; start horizontal movement
 	LDA #BTN_LEFT
 	BIT buttons
 	BEQ noleft
 	LDA #$00
 	STA player_dir
-
-	;; if not grounded, use air friction
-	LDA fric
-	LDX coyote
-	BNE :+
-	LDA airfric
-:       STA efric
 
 	SEC
 	LDA player_vx
