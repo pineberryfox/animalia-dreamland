@@ -19,3 +19,4 @@ BTN_LEFT   = $02
 BTN_RIGHT  = $01
 
 XSPEED = $20
+airfric = $16

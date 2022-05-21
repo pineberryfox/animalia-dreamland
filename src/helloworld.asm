@@ -232,10 +232,10 @@ palettes:
 .byte $21, $0C, $32, $27 ; sprite palette 2
 ;.byte $1D, $00, $10, $20 ; grey ramp
 ; sprites
-.byte $21, $0c, $30, $27
+.byte $21, $0C, $30, $27
 .byte $21, $0C, $16, $27
-.byte $1c, $0c, $30, $27
-.byte $1c, $0c, $30, $27
+.byte $1C, $0C, $30, $27
+.byte $1C, $0C, $30, $27
 
 sprites:
 .byte $70, $01, $00, $80

@@ -246,6 +246,11 @@ nojump:
 	STA player_vy
 	LDA vterm
 	STA player_vy + 1
+	LDA vterm
+	CMP #$04
+	BCS next
+	LDA #$04
+	STA player_tile
 next:	CLC
 	LDA player_suby
 	ADC player_vy
@@ -353,11 +358,20 @@ endCollV:
 	LDA #$00
 	STA player_dir
 
+	;; if not grounded, use air friction
+	;; rather than ground friction.
+	;; should this be randomized too??
+	LDA fric
+	LDX coyote
+	BNE :+
+	LDA #airfric
+:       STA efric
+
 	SEC
 	LDA player_vx
 	BIT player_vx + 1
 	BMI lsubxs
-	SBC fric
+	SBC efric
 	STA player_vx
 	JMP lefted
 lsubxs: SBC #XSPEED
@@ -383,7 +397,7 @@ noleft: LDA #BTN_RIGHT
 	LDA player_vx
 	BIT player_vx + 1
 	BPL raddxs
-	ADC fric
+	ADC efric
 	STA player_vx
 	JMP rghted
 raddxs: ADC #XSPEED
@@ -404,7 +418,7 @@ norght:
 	LDA #$00
 	STA player_state
 	STA player_tile
-nongnd: LDA fric
+nongnd: LDA efric
 	LSR A
 	STA temp
 	BIT player_vx + 1
@@ -542,6 +556,7 @@ player_vx: .res 2
 player_vy: .res 2
 jumpforce: .res 2
 fric: .res 1
+efric: .res 1
 grav: .res 1
 .export fric, grav, jumpforce
 .import prevbuttons
