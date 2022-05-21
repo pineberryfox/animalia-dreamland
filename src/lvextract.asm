@@ -141,6 +141,23 @@ uin:	LDA lefts,Y
 	ORA #$08
 	TAY
 	JSR init_player
+
+	LDX #$03
+	LDY #$1D
+cloop:	LDA (level),Y
+	AND #$F0
+	ORA #$08
+	STA cx,X
+	LDA (level),Y
+	ASL A
+	ASL A
+	ASL A
+	ASL A
+	ORA #$08
+	STA cy,X
+	INY
+	DEX
+	BPL cloop
 	RTS
 .endproc
 
@@ -292,6 +309,10 @@ lv1:
 .byte $0E, $00, $0E, $00, $00, $00, $80, $03
 .byte $FF, $03, $FF, $03
 .byte $1B ; player spawn (1,11)
+.byte $05
+.byte $D1
+.byte $FA
+.byte $AD
 
 .export lv2
 lv2:
@@ -314,5 +335,7 @@ nprevl:  .res 1
 level:   .res 2
 lefts:   .res 16
 rights:  .res 16
+cx: .res 4
+cy: .res 4
 .importzp ready
-.exportzp level
+.exportzp cx, cy, level

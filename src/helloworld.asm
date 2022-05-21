@@ -85,6 +85,7 @@ vblankwait: ; wait for another vblank before continuing
 
 mainloop:
 	JSR draw_player
+	JSR draw_crystals
 	JSR readjoy
 	JSR update_player
 	LDA #BTN_START
@@ -223,6 +224,49 @@ cont:   DEX
 	RTS
 .endproc
 
+.importzp cx, cy
+.proc draw_crystals
+	LDX #$03
+	LDY #$00
+lt:	LDA cy,X
+	STA $0240,Y
+	INY
+	LDA #$00
+	STA $0240,Y
+	INY
+	LDA #$02
+	STA $0240,Y
+	INY
+	LDA cx,X
+	SEC
+	SBC #$04
+	STA $0240,Y
+	INY
+	DEX
+	BPL lt
+
+	LDX #$03
+lb:	LDA cy,X
+	CLC
+	ADC #$08
+	STA $0240,Y
+	INY
+	LDA #$10
+	STA $0240,Y
+	INY
+	LDA #$02
+	STA $0240,Y
+	INY
+	LDA cx,X
+	SEC
+	SBC #$04
+	STA $0240,Y
+	INY
+	DEX
+	BPL lb
+	RTS
+.endproc
+
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
 
@@ -234,14 +278,14 @@ palettes:
 ; bgs
 .byte $21, $1B, $17, $29
 .byte $21, $1C, $32, $32
-.byte $21, $0C, $30, $27 ; sprite palette 1
-.byte $21, $0C, $16, $27 ; sprite palette 2
+.byte $21, $0C, $30, $27 ; mirror of sprite palette 1
+.byte $21, $0C, $16, $27 ; mirror of sprite palette 2
 ;.byte $1D, $00, $10, $20 ; grey ramp
 ; sprites
 .byte $21, $0C, $30, $27
 .byte $21, $0C, $16, $27
-.byte $1C, $0C, $30, $27
-.byte $1C, $0C, $30, $27
+.byte $21, $1C, $29, $32
+.byte $21, $0C, $30, $27
 
 sprites:
 .byte $70, $01, $00, $80

@@ -16,6 +16,10 @@
 real:
 	;; y /= 16; y *= 2;
 	TYA
+	CMP #$CF
+	BCC lowy
+	LDA #$CF
+lowy:
 	LSR A
 	LSR A
 	LSR A
