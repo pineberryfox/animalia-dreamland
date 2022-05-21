@@ -10,6 +10,10 @@
 	;; (also in Z flag)
 .export collide
 .proc collide
+	LDA player_overy
+	BPL real
+	LDY #$00
+real:
 	;; y /= 16; y *= 2;
 	TYA
 	LSR A
@@ -47,3 +51,4 @@ alp:	ROR A
 end:	RTS
 .endproc
 .importzp level
+.importzp player_overy

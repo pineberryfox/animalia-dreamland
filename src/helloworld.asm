@@ -108,6 +108,13 @@ noload: JSR wait_vblank
 	LDA #$01
 	STA camx
 
+	;; assign species
+	JSR rand
+	AND #$40
+	CLC
+	ADC #$08
+	STA player_base ; either $08 or $48
+
 	;; assign jump duration deltat and height deltay
 	JSR rand
 	AND #$1F
@@ -128,17 +135,14 @@ noload: JSR wait_vblank
 	LDA #$00
 	STA dividend
 	JSR udiv16o8
-	;; gotta negate this
+	;; gotta negate this (but let's not add one)
 	LDA dividend
 	EOR #$FF
 	STA jumpforce
 	LDA dividend + 1
 	EOR #$FF
 	STA jumpforce + 1
-	INC jumpforce
-	BNE noinc
-	INC jumpforce + 1
-noinc:
+
 	;; find gravity
 	LSR divisor
 	LDA #$00
@@ -229,7 +233,7 @@ palettes:
 ;.byte $1D, $00, $10, $20 ; grey ramp
 ; sprites
 .byte $21, $0c, $30, $27
-.byte $21, $0C, $32, $27
+.byte $21, $0C, $16, $27
 .byte $1c, $0c, $30, $27
 .byte $1c, $0c, $30, $27
 
@@ -253,4 +257,4 @@ divisor: .res 1
 .segment "ZEROPAGE"
 ready: .res 1
 .exportzp ready
-.importzp buttons, level
+.importzp buttons, level, player_base

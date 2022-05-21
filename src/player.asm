@@ -8,8 +8,6 @@
 .proc init_player
 	STX player_x
 	STY player_y
-	LDA #$08
-	STA player_base
 	LDA #$01
 	STA player_tile
 	STA player_dir
@@ -36,7 +34,12 @@
 	PHP
 	PHA
 
-	LDA player_dir ; palette 0, no flippage
+	LDA player_base
+	AND #$40
+	LSR A
+	LSR A
+	LSR A
+	ORA player_dir ; palette 0 or 1, no flippage
 	EOR #$01
 	CLC
 	ROR A
@@ -46,6 +49,7 @@
 	STA $0206
 	STA $020A
 	STA $020E
+	AND #$40
 	BNE leftface
 	LDA player_tile
 	CLC
@@ -166,30 +170,20 @@ nojbutton:
 
 	LDA #$02
 	STA player_state ; jumping if nothing overrides
-	LDA jbuff
-	BEQ nojump
-	LDA coyote
-	BNE jumping
-	;; here we should check:
-	;; if a bird AND vy>=0 a "jump" is allowed,
-	;; but actually bird has a different jump,
-	;; so give that some thought
-	JMP nojump
-jumping:
-	LDA jumpforce
-	STA player_vy
-	LDA jumpforce + 1
-	STA player_vy + 1
-	LDA #$00
-	STA jbuff
-	STA coyote
-nojump:
 
 	;; start vertical movement
+	LDA #$0F
+	STA vterm
 	LDA #(BTN_A | BTN_B)
 	BIT buttons
-	BNE only1g
-	CLC
+	BEQ nojhold
+	LDA player_base
+	CMP #$10
+	BCC only1g
+	LDA #$01
+	STA vterm
+	JMP only1g
+nojhold:CLC
 	LDA player_vy
 	ADC grav
 	STA player_vy
@@ -211,12 +205,46 @@ only1g: CLC
 	ADC #$00
 	STA player_vy + 1
 
+	;; jumping?
+	LDY player_base
+	LDA jbuff
+	BEQ nojump
+	LDA coyote
+	BNE jumping
+	CPY #$10
+	BCC nojump ; don't jump if a hamster
+	BIT player_vy + 1
+	BMI nojump ; don't jump if a bird and going up
+jumping:
+	LDA coyote
+	BNE hamj
+	CPY #$10
+	BCS birdj
+hamj:   LDA jumpforce
+	STA player_vy
+	LDA jumpforce + 1
+	STA player_vy + 1
+	JMP endj
+birdj:  LDA jumpforce
+	CLC
+	ADC player_vy
+	STA player_vy
+	LDA jumpforce + 1
+	ADC player_vy + 1
+	STA player_vy + 1
+endj:   LDA #$00
+	STA jbuff
+	STA coyote
+nojump:
+
+
 	;; cap out at terminal velocity
-	CMP #$0F
+	LDA player_vy + 1
+	CMP vterm
 	BMI next
 	LDA #$00
 	STA player_vy
-	LDA #$0F
+	LDA vterm
 	STA player_vy + 1
 next:	CLC
 	LDA player_suby
@@ -234,6 +262,22 @@ vyup:	LDA player_overy
 	ADC #$FF
 vydone: STA player_overy
 
+	LDA player_base
+	CMP #$10
+	BCC chkycoll
+	LDA player_overy
+	BPL chkycoll
+	LDA player_y
+	CMP #$08
+	BCC chkycoll
+	LDA #$08
+	STA player_y
+	LDA #$00
+	STA player_suby
+	STA player_overy
+	STA player_vy
+	STA player_vy + 1
+chkycoll:
 	;; check y-collisions
 	BIT player_vy + 1
 	BMI collU
@@ -491,9 +535,9 @@ maxt:
 .segment "BSS"
 coyote: .res 1
 jbuff: .res 1
+vterm: .res 1
 player_subx: .res 1
 player_suby: .res 1
-player_overy: .res 1
 player_vx: .res 2
 player_vy: .res 2
 jumpforce: .res 2
@@ -509,6 +553,8 @@ player_tile: .res 1
 player_base: .res 1
 player_dir: .res 1
 player_state: .res 1
+player_overy: .res 1
 temp: .res 1
 timer: .res 1
 .importzp buttons
+.exportzp player_base, player_overy
