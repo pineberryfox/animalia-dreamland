@@ -157,6 +157,12 @@ noload: JSR wait_vblank
 	STA grav
 
 	JSR rand
+	AND #$0F
+	CLC
+	ADC #$0E
+	STA airfric
+
+	JSR rand
 	AND #$3F
 	CLC
 	ADC #$06
@@ -252,7 +258,7 @@ remainder: .res 2
 dividend: .res 2
 divisor: .res 1
 .export camx
-.import fric, grav, jumpforce
+.import airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
 ready: .res 1

@@ -359,12 +359,10 @@ endCollV:
 	STA player_dir
 
 	;; if not grounded, use air friction
-	;; rather than ground friction.
-	;; should this be randomized too??
 	LDA fric
 	LDX coyote
 	BNE :+
-	LDA #airfric
+	LDA airfric
 :       STA efric
 
 	SEC
@@ -556,9 +554,10 @@ player_vx: .res 2
 player_vy: .res 2
 jumpforce: .res 2
 fric: .res 1
+airfric: .res 1
 efric: .res 1
 grav: .res 1
-.export fric, grav, jumpforce
+.export airfric, fric, grav, jumpforce
 .import prevbuttons
 
 .segment "ZEROPAGE"
