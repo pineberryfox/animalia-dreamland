@@ -36,13 +36,11 @@ noinc:	AND #$07
 	TAX
 
 	LDA (level),Y
-	STA 49
 	;; set the appropriate bit
 	LDA #$00
 	SEC
 alp:	ROR A
 	DEX
-	STA 48
 	BPL alp
 	;; get it
 	AND (level),Y
