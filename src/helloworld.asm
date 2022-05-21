@@ -167,7 +167,7 @@ noload: JSR wait_vblank
 	CLC
 	ADC #$06
 	STA fric
-	CMP #26
+	CMP #$26
 	BPL summer
 	LDY #$55
 	LDA #$00
