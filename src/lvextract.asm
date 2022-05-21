@@ -335,7 +335,5 @@ nprevl:  .res 1
 level:   .res 2
 lefts:   .res 16
 rights:  .res 16
-cx: .res 4
-cy: .res 4
-.importzp ready
-.exportzp cx, cy, level
+.importzp cx, cy
+.exportzp level

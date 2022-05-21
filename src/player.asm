@@ -571,4 +571,4 @@ player_overy: .res 1
 temp: .res 1
 timer: .res 1
 .importzp buttons
-.exportzp player_base, player_overy
+.exportzp player_base, player_x, player_y, player_overy

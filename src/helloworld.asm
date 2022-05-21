@@ -48,6 +48,9 @@ wait:	LDA ready
 .import draw_player
 .import update_player
 
+.import draw_crystals
+.import crystal_get
+
 .export main
 .proc main
 	LDX #$00
@@ -88,6 +91,7 @@ mainloop:
 	JSR draw_crystals
 	JSR readjoy
 	JSR update_player
+	JSR crystal_get
 	LDA #BTN_START
 	bit buttons
 	BEQ noload
@@ -224,48 +228,6 @@ cont:   DEX
 	RTS
 .endproc
 
-.importzp cx, cy
-.proc draw_crystals
-	LDX #$03
-	LDY #$00
-lt:	LDA cy,X
-	STA $0240,Y
-	INY
-	LDA #$00
-	STA $0240,Y
-	INY
-	LDA #$02
-	STA $0240,Y
-	INY
-	LDA cx,X
-	SEC
-	SBC #$04
-	STA $0240,Y
-	INY
-	DEX
-	BPL lt
-
-	LDX #$03
-lb:	LDA cy,X
-	CLC
-	ADC #$08
-	STA $0240,Y
-	INY
-	LDA #$10
-	STA $0240,Y
-	INY
-	LDA #$02
-	STA $0240,Y
-	INY
-	LDA cx,X
-	SEC
-	SBC #$04
-	STA $0240,Y
-	INY
-	DEX
-	BPL lb
-	RTS
-.endproc
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
@@ -300,8 +262,9 @@ deltat: .res 1
 deltay: .res 1
 remainder: .res 2
 dividend: .res 2
+temp: ; shared with divisor
 divisor: .res 1
-.export camx
+.export camx, temp
 .import airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
