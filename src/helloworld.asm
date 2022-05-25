@@ -88,9 +88,77 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #$1E
 	STA PPUMASK
 
-	JSR loadlevel
-
 mainloop:
+	JSR titlescreen
+	JSR threelevel
+	JMP mainloop
+.endproc
+
+.proc clear2000
+	LDA #$00
+	STA PPUMASK
+	LDY #$03
+ol:     TYA
+	CLC
+	ADC #$20
+	BIT PPUSTATUS
+	STA PPUADDR
+	LDX #$00
+	STX PPUADDR
+	TXA
+il:	STA PPUDATA
+	DEX
+	BNE il
+	DEY
+	BPL ol
+	LDA #$0E
+	STA PPUMASK
+	RTS
+.endproc
+
+
+.import prevbuttons
+.proc titlescreen
+	JSR clear2000
+	JSR wait_vblank
+	LDA #$3F
+	BIT PPUSTATUS
+	STA PPUADDR
+	LDA #$00
+	STA PPUADDR
+	STA camx
+	LDA #$0C
+	STA PPUDATA
+getkey: JSR wait_vblank
+	JSR readjoy
+	LDA prevbuttons
+	EOR #$FF
+	AND #(BTN_A | BTN_B | BTN_START)
+	BIT buttons
+	BEQ getkey
+	JSR wait_vblank
+	JSR clear2000
+	JSR wait_vblank
+	RTS
+.endproc
+
+.proc threelevel
+	JSR loadlevel
+	JSR maingame
+	CPY #$00
+	BEQ end
+	JSR loadlevel
+	JSR maingame
+	CPY #$00
+	BEQ end
+	JSR loadlevel
+	JSR maingame
+end:    RTS
+.endproc
+
+	;; maingame returns a Boolean for whether we won or not in Y
+.importzp cy, player_overy
+.proc maingame
 	LDA #$00
 	STA frame
 	JSR draw_player
@@ -98,12 +166,20 @@ mainloop:
 	JSR readjoy
 	JSR update_player
 	JSR crystal_get
-	LDA #BTN_START
-	bit buttons
-	BEQ noload
-	JSR loadlevel
-noload: JSR wait_vblank
-	JMP mainloop
+	LDA cy
+	AND cy+1
+	AND cy+2
+	AND cy+3
+	LDY #$01
+	EOR #$FF
+	BEQ end
+	LDY #$00
+	LDX player_overy
+	DEX
+	BPL end
+	JSR wait_vblank
+	JMP maingame
+end:    RTS
 .endproc
 
 .import last_level, levels
