@@ -9,6 +9,8 @@
 .export wait_vblank
 .proc wait_vblank
 	PHA
+	LDA #$FF
+	STA frame
 	LDA #$90
 	ORA camx
 	BIT PPUSTATUS
@@ -34,6 +36,11 @@ wait:	LDA ready
 	LDA #$02
 	STA OAMDMA
 	INC ready
+
+	LDA frame
+	BMI end
+	INC $FF
+end:
 	;; start pulling
 	PLA
 	RTI
@@ -54,6 +61,7 @@ wait:	LDA ready
 .export main
 .proc main
 	LDX #$00
+	STX frame
 	STX camx
 	STX PPUMASK
 	LDY #$00
@@ -80,13 +88,11 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #$1E
 	STA PPUMASK
 
-	LDA #<lv1
-	STA level
-	LDA #>lv1
-	STA level+1
 	JSR loadlevel
 
 mainloop:
+	LDA #$00
+	STA frame
 	JSR draw_player
 	JSR draw_crystals
 	JSR readjoy
@@ -100,25 +106,73 @@ noload: JSR wait_vblank
 	JMP mainloop
 .endproc
 
+.import last_level, levels
 .proc loadlevel
-	LDA #$00
-	STA camx
 	LDA #$0E
 	STA PPUMASK
+
+	LDX #$00
+	STX level + 1
+	JSR rand
+	AND last_level
+	STA level
+	ASL A
+	ROL level + 1
+	ORA level
+	STA level
+	LDX #$04
+lvmul:  CLC
+	ROL level
+	ROL level + 1
+	DEX
+	BNE lvmul
+	;; successfully multiplied, now add to pointer
+	CLC
+	LDA level
+	ADC #<levels
+	STA level
+	LDA level + 1
+	ADC #>levels
+	STA level + 1
+	;; now load it
+	JSR wait_vblank
+	LDA #$3F
+	STA PPUADDR
+	LDA #$00
+	STA PPUADDR
+	LDA #$0C
+	STA PPUDATA
+	JSR wait_vblank
+	JSR showlevel
+	LDX #$00
+	STX camx
+	JSR wait_vblank
 	JSR lvextract
+	JSR wait_vblank
+	LDA #$3F
+	STA PPUADDR
+	LDA #$00
+	STA PPUADDR
+	LDA palettes
+	STA PPUDATA
+	JSR wait_vblank
+
+	;; assign species
+	JSR rand
+	AND #$07
+	BNE next
+	LDA #$40
+next:   AND #$F8
+	ORA #$08
+	STA player_base ; either $08 or $48
+
 	LDA #$00
 	STA buttons
 	JSR update_player
 	JSR draw_player
+	JSR draw_crystals
 	LDA #$01
 	STA camx
-
-	;; assign species
-	JSR rand
-	AND #$40
-	CLC
-	ADC #$08
-	STA player_base ; either $08 or $48
 
 	;; assign jump duration deltat and height deltay
 	JSR rand
@@ -197,6 +251,50 @@ wpal:	STY PPUDATA
 	RTS
 .endproc
 
+
+.proc showlevel
+	BIT PPUSTATUS
+	LDA #$21
+	STA PPUADDR
+	LDA #$E8
+	STA PPUADDR
+	LDY #$21
+	LDX #$0F
+tops:   LDA (level),Y
+	STA PPUDATA
+	INY
+	DEX
+	BNE tops
+
+	BIT PPUSTATUS
+	LDA #$22
+	STA PPUADDR
+	LDA #$08
+	STA PPUADDR
+	LDY #$21
+	LDX #$0F
+bots:   LDA (level),Y
+	CLC
+	ADC #$40
+	STA PPUDATA
+	INY
+	DEX
+	BNE bots
+
+	LDA #$23
+	STA PPUADDR
+	LDA #$C0
+	STA PPUADDR
+	LDA #$AA
+	LDX #$40
+wpal:   STA PPUDATA
+	DEX
+	BNE wpal
+	RTS
+.endproc
+
+
+
 	;; inputs:
 	;; * 16-bit little-endian value in dividend
 	;; * 8-bit divisor
@@ -240,7 +338,7 @@ palettes:
 ; bgs
 .byte $21, $1B, $17, $29
 .byte $21, $1C, $32, $32
-.byte $21, $0C, $30, $27 ; mirror of sprite palette 1
+.byte $21, $0C, $0C, $32
 .byte $21, $0C, $16, $27 ; mirror of sprite palette 2
 ;.byte $1D, $00, $10, $20 ; grey ramp
 ; sprites
@@ -269,5 +367,6 @@ divisor: .res 1
 
 .segment "ZEROPAGE"
 ready: .res 1
+frame: .res 1
 .exportzp ready
 .importzp buttons, level, player_base

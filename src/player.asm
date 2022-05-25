@@ -96,6 +96,7 @@ placed: ;; remember the camera is offset; account for that here
 	STA $0200
 	STA $0204
 	CLC
+	LDA player_y
 	ADC #$08
 	ORA player_overy
 	STA $0208

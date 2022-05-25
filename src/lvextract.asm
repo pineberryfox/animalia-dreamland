@@ -301,27 +301,6 @@ rtlx2:	STY rights,X
 	BNE rtl2
 .endproc
 
-.segment "RODATA"
-.export lv1
-lv1:
-.byte $00, $00, $00, $00, $00, $00, $00, $00
-.byte $0F, $E0, $00, $00, $80, $00, $00, $00
-.byte $0E, $00, $0E, $00, $00, $00, $80, $03
-.byte $FF, $03, $FF, $03
-.byte $1B ; player spawn (1,11)
-.byte $05
-.byte $D1
-.byte $FA
-.byte $AD
-
-.export lv2
-lv2:
-.byte $00, $00, $00, $00, $00, $00, $0F, $80
-.byte $0F, $80, $0C, $00, $0C, $00, $0C, $18
-.byte $00, $00, $00, $00, $01, $80, $01, $80
-.byte $01, $80, $F9, $8F
-.byte $0C ; player spawn (8,10)
-
 .segment "BSS"
 currow:  .res 2
 prevrow: .res 2
