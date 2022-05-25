@@ -455,14 +455,14 @@ endhrz: CLC
 	ADC player_vx + 1
 	STA player_x
 	LDA player_x
-	CMP #$F7
+	CMP #$F8
 	BCC noredge
-	LDA #$F7
+	LDA #$F8
 	STA player_x
 	JMP vxTo0
-noredge:CMP #$09
+noredge:CMP #$08
 	BCS noxshunt
-	LDA #$09
+	LDA #$08
 	STA player_x
 vxTo0:	LDA #$00
 	STA player_vx

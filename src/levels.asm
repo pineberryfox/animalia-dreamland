@@ -55,6 +55,35 @@
 .charmap $7a, $49
 .charmap $7b, $4a
 
+	;; levels are a fixed 48 bytes in size
+	;; so get your index via multiplication and addition
+.export levels
+.align $100
+levels:
+.incbin "skyland.level"
+.byte "    Skyland    "
+
+.incbin "claw.level"
+.byte " Gripping Claw "
+
+.incbin "pup.level"
+.byte "      Pup      "
+
+.incbin "man.level"
+.byte "Man and Mystery"
+
+.incbin "spider.level"
+.byte "     Spider    "
+
+.incbin "hill.level"
+.byte "Bifurcated Hill"
+
+.incbin "closed.level"
+.byte "   Closed Off  "
+
+.incbin "towers.level"
+.byte "   Two Towers  "
+
 	;; there should always be a number of levels
 	;; equal to some power of 2.
 	;; last_level is the zero-based index of the final one.
@@ -62,27 +91,5 @@
 	;; begin with a stream of zeros
 	;; and end with a stream of ones
 .export last_level
-last_level: .byte $01
+last_level: .byte (last_level - levels)/48 - 1
 
-	;; levels are a fixed 48 bytes in size
-	;; so get your index via multiplication and addition
-.export levels
-.align $100
-levels:
-lv1:
-.byte $00, $00, $00, $00, $00, $00, $00, $00
-.byte $0F, $E0, $00, $00, $80, $00, $00, $00
-.byte $0E, $00, $0E, $00, $00, $00, $80, $03
-.byte $FF, $03, $FF, $03
-.byte $1B ; player spawn (1,11)
-.byte $05, $D1, $FA, $AD ; crystals
-.byte "    Skyland    "
-
-lv2:
-.byte $00, $00, $00, $00, $00, $00, $0F, $80
-.byte $0F, $80, $0C, $00, $0C, $00, $0C, $18
-.byte $00, $00, $00, $00, $01, $80, $01, $80
-.byte $01, $80, $F9, $8F
-.byte $79 ; player spawn (7,9)
-.byte $0C, $21, $D3, $FC ; crystals
-.byte " Gripping Claw "

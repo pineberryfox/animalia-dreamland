@@ -118,7 +118,8 @@ noload: JSR wait_vblank
 	STA level
 	ASL A
 	ROL level + 1
-	ORA level
+	CLC
+	ADC level
 	STA level
 	LDX #$04
 lvmul:  CLC
