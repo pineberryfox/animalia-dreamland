@@ -361,35 +361,35 @@ mins:	LDA timer + 2
 	ORA #$B0
 	STA timerstr + 4
 	;; frame
-	;; x1000 = (x128 - x3)*8
+	;; x1000/60 is x50/3; x50 is (x16+x8+x1)x2
 	LDA timer
 	STA dividend
 	STA temp
-	LDX #$07
-shl:	ASL dividend
+	ASL dividend
 	ROL dividend + 1
-	DEX
-	BNE shl
-	LDA temp
-	ASL A
+	LDA dividend
 	CLC
 	ADC temp
-	STA temp
-	SEC
-	LDA dividend
-	SBC temp
 	STA dividend
 	LDA dividend + 1
-	SBC #$00
+	ADC #$00
 	STA dividend + 1
-	LDX #$03
-mul8:	ASL dividend
+	ASL temp
+	LDX #$04
+mul16:	ASL dividend
 	ROL dividend + 1
 	DEX
-	BNE mul8 ; finally we've done it, we've multiplied by 1000
-	LDA #60 ; divide by 60
+	BNE mul16
+	LDA dividend
+	CLC
+	ADC temp
+	STA dividend
+	LDA dividend + 1
+	ADC #$00
+	STA dividend + 1
+	LDA #$03 ; divide by 3
 	STA divisor
-	JSR udiv16o8 ; and we're actually using the full 16 bits!
+	JSR udiv16o8 ; and we're actually using more than 8 bits!
 	;; now let's get some digits!
 	LDA #$0A
 	STA divisor
