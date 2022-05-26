@@ -559,6 +559,7 @@ airfric: .res 1
 efric: .res 1
 grav: .res 1
 .export airfric, fric, grav, jumpforce
+.export player_vx, player_vy
 .import prevbuttons
 
 .segment "ZEROPAGE"
@@ -572,4 +573,5 @@ player_overy: .res 1
 temp: .res 1
 timer: .res 1
 .importzp buttons
-.exportzp player_base, player_x, player_y, player_overy
+.exportzp player_base, player_dir, player_tile
+.exportzp player_x, player_y, player_overy

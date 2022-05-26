@@ -49,7 +49,7 @@ noadd:  STA $0240,Y
 .export crystal_get
 .proc crystal_get
 	;; compute manhattan distance of player-center from crystal
-	;; if < 13, collect!
+	;; if sufficiently small, collect!
 	BIT player_overy
 	BMI notouchy
 	LDX #$03
@@ -58,7 +58,7 @@ cloop:  LDA cx,X
 	SBC player_x
 	BPL nonegx
 	EOR #$FF ; should add one, but who cares
-nonegx: CMP #$0D
+nonegx: CMP #$0B
 	BPL end
 	STA temp
 	LDA cy,X
@@ -68,6 +68,7 @@ nonegx: CMP #$0D
 	EOR #$FF ; see above
 nonegy: CMP #$0D
 	BPL end
+	LSR A
 	CLC
 	ADC temp
 	CMP #$0D
