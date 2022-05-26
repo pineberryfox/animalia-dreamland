@@ -1,6 +1,8 @@
 .include "constants.inc"
-.include "header.inc"
 .include "fontmap.inc"
+.include "header.inc"
+
+.import logoscreen, titlescreen, winscreen, losescreen
 
 .segment "CODE"
 .proc irq_handler
@@ -91,480 +93,17 @@ vblankwait: ; wait for another vblank before continuing
 	STA PPUMASK
 	JSR logoscreen
 
+	LDA #$FF
+	STA should_srand
 mainloop:
 	JSR titlescreen
 	JSR threelevel
-	JMP won
 	CPY #$00
 	BNE won
-lost:	; womp womp
+lost:	JSR losescreen
 	JMP mainloop
 won:	JSR winscreen
 	JMP mainloop
-.endproc
-
-.proc clear2000
-	LDA #$00
-	STA PPUMASK
-	LDY #$03
-ol:	TYA
-	CLC
-	ADC #$20
-	BIT PPUSTATUS
-	STA PPUADDR
-	LDX #$00
-	STX PPUADDR
-	TXA
-il:	STA PPUDATA
-	DEX
-	BNE il
-	DEY
-	BPL ol
-	LDA #$23
-	STA PPUADDR
-	LDA #$C0
-	STA PPUADDR
-	LDA #$AA
-	LDX #$40
-wpal:	STA PPUDATA
-	DEX
-	BNE wpal
-	LDA #$0E
-	STA PPUMASK
-	RTS
-.endproc
-
-.proc logoscreen
-	JSR clear2000
-	LDA #$00
-	BIT PPUSTATUS
-	STA PPUMASK
-	LDA #$23
-	STA PPUADDR
-	LDA #$C0
-	STA PPUADDR
-	LDA #$FF
-	LDX #$40
-wpal:	STA PPUDATA
-	DEX
-	BNE wpal
-	LDA #$3F
-	STA PPUADDR
-	LDA #$00
-	STA PPUADDR
-	LDA #$0C
-	STA PPUDATA
-	;; palettes set; now let's display the logo
-	BIT PPUSTATUS
-	LDA #$21
-	STA PPUADDR
-	LDA #$CD
-	STA PPUADDR
-	LDY #$CA
-	LDX #$06
-logo1:	STY PPUDATA
-	INY
-	DEX
-	BNE logo1
-	LDA #$21
-	STA PPUADDR
-	LDA #$ED
-	STA PPUADDR
-	LDY #$DA
-	LDX #$06
-logo2:	STY PPUDATA
-	INY
-	DEX
-	BNE logo2
-	LDA #$22
-	STA PPUADDR
-	LDA #$0D
-	STA PPUADDR
-	LDY #$EA
-	LDX #$06
-logo3:	STY PPUDATA
-	INY
-	DEX
-	BNE logo3
-	LDA #$22
-	STA PPUADDR
-	LDA #$2D
-	STA PPUADDR
-	LDY #$FA
-	LDX #$06
-logo4:	STY PPUDATA
-	INY
-	DEX
-	BNE logo4
-	;; wordmark time :D
-	LDY #$00
-	LDA #$22
-	STA PPUADDR
-	LDA #$4B
-	STA PPUADDR
-word1:	LDA logomark,Y
-	BEQ word1e
-	CLC
-	ADC #$60
-	STA PPUDATA
-	INY
-	JMP word1
-word1e:	INY
-	LDA #$22
-	STA PPUADDR
-	LDA #$6E
-	STA PPUADDR
-word2:	LDA logomark,Y
-	BEQ word2e
-	CLC
-	ADC #$60
-	STA PPUDATA
-	INY
-	JMP word2
-word2e:
-	;; turn the display on (no sprites tho)
-	LDA #$0E
-	STA PPUMASK
-	LDX #$80
-lp:	JSR wait_vblank
-	DEX
-	BNE lp
-	RTS
-.endproc
-
-
-.import prevbuttons
-.proc titlescreen
-	JSR clear2000
-	JSR wait_vblank
-	LDA #$00
-	STA PPUMASK
-	;; display title
-	BIT PPUSTATUS
-	LDA #$20
-	STA PPUADDR
-	LDA #$EC
-	STA PPUADDR
-	LDX #$06
-	LDY #$2A
-tl:	STY PPUDATA
-	INY
-	CPY #$2C
-	BNE nospc
-	LDA #$20
-	STA PPUDATA
-nospc:	DEX
-	BNE tl
-	LDA #$21
-	STA PPUADDR
-	LDA #$0B
-	STA PPUADDR
-	LDY #$00
-tlt:	LDA titleword,Y
-	BEQ endtitletop
-	STA PPUDATA
-	INY
-	JMP tlt
-endtitletop:
-	LDA #$21
-	STA PPUADDR
-	LDA #$2B
-	STA PPUADDR
-	LDY #$00
-tlb:	LDA titleword,Y
-	BEQ endtitleword
-	CLC
-	ADC #$30
-	STA PPUDATA
-	INY
-	JMP tlb
-endtitleword:
-	;; now add "press start"
-	LDA #$22
-	STA PPUADDR
-	LDA #$EA
-	STA PPUADDR
-	LDY #$00
-st:	LDA pressstart,Y
-	BEQ endst
-	CLC
-	ADC #$60
-	STA PPUDATA
-	INY
-	JMP st
-endst:
-	;; BG colour
-	LDA #$0E
-	STA PPUMASK
-	LDA #$3F
-	BIT PPUSTATUS
-	STA PPUADDR
-	LDA #$00
-	STA PPUADDR
-	STA camx ; and ensure we're using the right screen
-	LDA #$0C
-	STA PPUDATA
-
-getkey:	INC srandr
-	JSR wait_vblank
-	JSR readjoy
-	LDA prevbuttons
-	EOR #$FF
-	AND #(BTN_A | BTN_B | BTN_START)
-	BIT buttons
-	BEQ getkey
-	LDX srandr
-	LDY #$00
-	JSR srand
-	JSR wait_vblank
-	JSR clear2000
-	JSR wait_vblank
-	RTS
-.endproc
-
-.proc fill_timerstr
-	;; fill timerstr from timer,
-	;; we'll be using the division vars as temps later
-	LDA #$BA
-	LDX #$09
-dashy:	STA timerstr,X
-	DEX
-	BNE dashy
-	LDA #100
-	CMP timer + 2
-	BNE mins
-	JMP colondot
-	;; minutes
-mins:	LDA timer + 2
-	STA dividend
-	LDA #$00
-	STA dividend + 1
-	LDA #$0A
-	STA divisor
-	JSR udiv16o8
-	LDA dividend
-	ORA #$B0
-	STA timerstr
-	LDA remainder
-	ORA #$B0
-	STA timerstr + 1
-	;; seconds
-	LDA timer + 1
-	STA dividend
-	LDA #$0A
-	STA divisor
-	JSR udiv16o8
-	LDA dividend
-	ORA #$B0
-	STA timerstr + 3
-	LDA remainder
-	ORA #$B0
-	STA timerstr + 4
-	;; frame
-	;; x1000/60 is x50/3; x50 is (x16+x8+x1)x2
-	LDA timer
-	STA dividend
-	STA temp
-	ASL dividend
-	ROL dividend + 1
-	LDA dividend
-	CLC
-	ADC temp
-	STA dividend
-	LDA dividend + 1
-	ADC #$00
-	STA dividend + 1
-	ASL temp
-	LDX #$04
-mul16:	ASL dividend
-	ROL dividend + 1
-	DEX
-	BNE mul16
-	LDA dividend
-	CLC
-	ADC temp
-	STA dividend
-	LDA dividend + 1
-	ADC #$00
-	STA dividend + 1
-	LDA #$03 ; divide by 3
-	STA divisor
-	JSR udiv16o8 ; and we're actually using more than 8 bits!
-	;; now let's get some digits!
-	LDA #$0A
-	STA divisor
-	JSR udiv16o8
-	LDA remainder
-	ORA #$B0
-	STA timerstr + 8
-	JSR udiv16o8
-	LDA remainder
-	ORA #$B0
-	STA timerstr + 7
-	LDA dividend
-	ORA #$B0
-	STA timerstr + 6
-colondot:
-	LDX #$BB
-	STX timerstr + 2
-	INX
-	STX timerstr + 5
-	RTS
-.endproc
-
-.import fake_level_for_end
-.importzp player_base, player_dir, player_tile, player_x, player_y
-.import player_vx, player_vy
-.proc winscreen
-	JSR fill_timerstr
-	JSR clear2000
-	LDX #$00
-	STX PPUMASK
-	STX player_tile
-	STX player_vx
-	STX player_vx + 1
-	STX player_y
-	STX player_y + 1
-	STX player_overy
-	STX dividend
-	INX
-	STX player_dir
-	LDA #$80
-	STA player_x
-	LDA #$78
-	STA player_y
-	LDA #$FF
-	TAX
-	INX
-lp:	STA $200,X
-	DEX
-	BNE lp
-	JSR draw_player
-
-	LDA #$23
-	STA PPUADDR
-	LDA #$C0
-	STA PPUADDR
-	LDA #$AA
-	LDX #$40
-wpal:	STA PPUDATA
-	DEX
-	BNE wpal
-
-	LDA #$3F
-	STA PPUADDR
-	LDA #$00
-	STA PPUADDR
-	LDA #$0C
-	STA PPUDATA
-
-	LDA #$22
-	STA PPUADDR
-	LDA #$4B
-	STA PPUADDR
-	LDY #$E5
-	STY PPUDATA
-	INY
-	LDX #$05
-bed:	STY PPUDATA
-	DEX
-	BNE bed
-	INY
-	STY PPUDATA
-	INY
-	STY PPUDATA
-	INY
-	STY PPUDATA
-
-	LDA #$22
-	STA PPUADDR
-	LDA #$6B
-	STA PPUADDR
-	LDY #$F5
-	STY PPUDATA
-	INY
-	LDX #$05
-bedb:	STY PPUDATA
-	DEX
-	BNE bedb
-	INY
-	STY PPUDATA
-	INY
-	STY PPUDATA
-	INY
-	STY PPUDATA
-
-	LDA #$22
-	STA PPUADDR
-	LDA #$31
-	STA PPUADDR
-	LDY #$D7
-	STY PPUDATA
-	INY
-	STY PPUDATA
-	INY
-	STY PPUDATA
-
-	LDA #$22
-	STA PPUADDR
-	LDA #$AB
-	STA PPUADDR
-	LDY #$00
-	LDX #$09
-tstr:	LDA timerstr,Y
-	STA PPUDATA
-	INY
-	DEX
-	BNE tstr
-
-	LDA #$00
-	STA camx
-	LDA #$1E
-	STA PPUMASK
-	LDX #$40
-cd:	JSR wait_vblank
-	DEX
-	BNE cd
-
-	;; gonna have some hops, fake a level and do it in-engine
-	LDA #<fake_level_for_end
-	STA level
-	LDA #>fake_level_for_end
-	STA level + 1
-	LDA buttons
-	STA temp
-	LDA deltat
-	LSR A
-	LSR A
-	STA dividend + 1
-
-key:	JSR wait_vblank
-	LDA temp
-	STA buttons
-	JSR readjoy
-	LDA buttons
-	STA temp
-	LDA prevbuttons
-	AND #(BTN_A | BTN_B | BTN_START)
-	EOR #$FF
-	BIT buttons
-	BNE end
-	LDA dividend
-	STA prevbuttons
-	DEC dividend + 1
-	BNE nofl
-	EOR #BTN_A
-	STA dividend
-	LDA deltat
-	LSR A
-	LSR A
-	STA dividend + 1
-nofl:	LDA dividend
-	STA buttons
-	JSR update_player
-	JSR draw_player
-	JMP key
-end:	RTS
 .endproc
 
 .import level_list
@@ -656,10 +195,10 @@ end:	RTS
 	CMP timer + 1
 	BNE fin
 	STX timer + 1
-	LDA #100
+	LDA #99
 	INC timer + 2
 	CMP timer + 2
-	BMI fin
+	BPL fin
 	STA timer + 2
 fin:	JMP maingame
 end:	RTS
@@ -851,6 +390,7 @@ bots:	LDA (level),Y
 	;; * 16-bit dividend/divisor in dividend
 	;; * 8-bit remainder in remainder
 	;; divisor remains unchanged
+.export udiv16o8
 .proc udiv16o8
 	LDA #$00
 	STA remainder
@@ -895,19 +435,12 @@ palettes:
 .byte $21, $1C, $29, $32
 .byte $21, $0C, $30, $27
 
-logomark:
-.asciiz "Pineberry"
-.asciiz "Fox"
-titleword:
-.asciiz "SOMNIORUM"
-pressstart:
-.asciiz "Press Start"
-
 .import lv1
 .import lv2
 .import lv3
 
 .segment "BSS"
+should_srand: .res 1
 camx: .res 1
 deltat: .res 1
 deltay: .res 1
@@ -916,13 +449,13 @@ dividend: .res 2
 temp: ; shared with divisor
 divisor: .res 1
 srandr: .res 1
-timerstr: .res 9
-.export camx, temp
+.export camx, deltat, deltay, dividend, divisor, temp, remainder, srandr
+.export should_srand
 .import airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
 ready: .res 1
 frame: .res 1
 timer: .res 3
-.exportzp ready
+.exportzp ready, timer
 .importzp buttons, level, player_base
