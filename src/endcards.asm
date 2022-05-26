@@ -148,6 +148,7 @@ lp:	JSR wait_vblank
 	JSR clear2000
 	JSR wait_vblank
 	LDA #$00
+	STA cheatpos
 	STA PPUMASK
 	;; display title
 	BIT PPUSTATUS
@@ -218,6 +219,25 @@ endst:
 getkey:	INC srandr
 	JSR wait_vblank
 	JSR readjoy
+	LDA prevbuttons
+	EOR #$FF
+	AND buttons
+	AND #(BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT)
+	BEQ real_check
+	LDX cheatpos
+	STA cheat,X
+	INX
+	TXA
+	AND #$0F
+	STA cheatpos
+real_check:
+	LDA prevbuttons
+	EOR #$FF
+	AND #BTN_SELECT
+	BIT buttons
+	BEQ no_cheat
+	JSR handle_cheat
+no_cheat:
 	LDA prevbuttons
 	EOR #$FF
 	AND #(BTN_A | BTN_B | BTN_START)
@@ -543,6 +563,29 @@ key:	JSR wait_vblank
 	RTS
 .endproc
 
+.proc handle_cheat
+	LDA #BTN_UP
+	BIT cheat
+	BEQ end
+	LDA #BTN_DOWN
+	BIT cheat + 1
+	BEQ end
+	LDA #BTN_RIGHT
+	BIT cheat + 2
+	BEQ end
+	JSR wait_vblank
+	BIT PPUSTATUS
+	LDA #$3F
+	STA PPUADDR
+	LDA #$13
+	STA PPUADDR
+	LDA #$25
+	STA PPUDATA
+end:	LDA #$00
+	STA cheatpos
+	RTS
+.endproc
+
 
 .segment "RODATA"
 logomark:
@@ -558,3 +601,6 @@ game_over:
 
 .segment "BSS"
 timerstr: .res 9
+.align 16
+cheat: .res 16
+cheatpos: .res 1
