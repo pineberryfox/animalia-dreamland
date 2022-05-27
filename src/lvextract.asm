@@ -23,6 +23,28 @@
 	STA toadd
 	LDA #$0E
 	STA tempi
+
+	;; upper row
+	JSR rowread
+	JSR wait_vblank
+	BIT PPUSTATUS
+	LDA #$2C
+	STA PPUADDR
+	LDA #$20
+	STA PPUADDR
+	LDX #$0F
+	LDY #$00
+il:	LDA lefts,Y
+	STA PPUDATA
+	LDA rights,Y
+	STA PPUDATA
+	INY
+	DEX
+	BPL il
+	LDA #$FF
+	STA currow
+	STA currow + 1
+
 dout:	JSR rowread
 	JSR wait_vblank
 	BIT PPUSTATUS
@@ -76,7 +98,6 @@ din:	LDA lefts,Y
 	STA level+1
 
 	;; now for down-to-up
-
 	LDA #$FF
 	STA currow
 	STA currow+1
@@ -84,6 +105,28 @@ din:	LDA lefts,Y
 	STA toadd
 	LDA #$0E
 	STA tempi
+
+	;; bottom row
+	JSR rowread
+	JSR wait_vblank
+	BIT PPUSTATUS
+	LDA #$24
+	STA PPUADDR
+	LDA #$00
+	STA PPUADDR
+	LDX #$0F
+	LDY #$00
+iil:	LDA lefts,Y
+	STA PPUDATA
+	LDA rights,Y
+	STA PPUDATA
+	INY
+	DEX
+	BPL iil
+	LDA #$FF
+	STA currow
+	STA currow + 1
+
 uout:	JSR rowread
 	JSR wait_vblank
 	BIT PPUSTATUS
