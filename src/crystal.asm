@@ -1,3 +1,5 @@
+.include "constants.inc"
+
 .segment "CODE"
 .import temp
 .export draw_crystals
@@ -5,18 +7,18 @@
 	LDX #$03
 	LDY #$00
 lt:	LDA cy,X
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	LDA #$00
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	LDA #$02
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	LDA cx,X
 	SEC
 	SBC #$04
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	DEX
 	BPL lt
@@ -27,18 +29,18 @@ lb:	LDA cy,X
 	BEQ noadd
 	CLC
 	ADC #$08
-noadd:  STA $0240,Y
+noadd:  STA CRYSTAL_OAM,Y
 	INY
 	LDA #$10
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	LDA #$02
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	LDA cx,X
 	SEC
 	SBC #$04
-	STA $0240,Y
+	STA CRYSTAL_OAM,Y
 	INY
 	DEX
 	BPL lb

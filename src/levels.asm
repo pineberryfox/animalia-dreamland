@@ -9,20 +9,20 @@ levels:
 .incbin "skyland.level"
 .byte "    Skyland    "
 
-.incbin "claw.level"
-.byte " Gripping Claw "
-
-.incbin "pup.level"
-.byte "      Pup      "
+.incbin "spider.level"
+.byte "     Spider    "
 
 .incbin "man.level"
 .byte "Man and Mystery"
 
-.incbin "spider.level"
-.byte "     Spider    "
+.incbin "claw.level"
+.byte " Gripping Claw "
 
 .incbin "hill.level"
 .byte "Bifurcated Hill"
+
+.incbin "pup.level"
+.byte "      Pup      "
 
 .incbin "closed.level"
 .byte "   Closed Off  "

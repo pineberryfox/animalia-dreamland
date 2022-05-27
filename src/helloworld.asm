@@ -165,14 +165,17 @@ end:	RTS
 
 	;; maingame returns a Boolean for whether we won or not in Y
 .importzp cy, player_overy
+.import draw_dusts, update_dusts
 .proc maingame
 	LDA #$00
 	STA frame
 	JSR draw_player
 	JSR draw_crystals
+	JSR draw_dusts
 	JSR readjoy
 	JSR update_player
 	JSR crystal_get
+	JSR update_dusts
 	LDA cy
 	AND cy+1
 	AND cy+2
@@ -205,7 +208,7 @@ end:	RTS
 .endproc
 
 	;; which level? the contents of A
-.import last_level, levels
+.import dusty, last_level, levels
 .proc loadlevel
 	LDX #$0E
 	STX PPUMASK
@@ -346,6 +349,13 @@ wpal:	STY PPUDATA
 	BNE wpal
 	JSR wait_vblank
 
+	;; kill dust
+	LDX #$0F
+	LDA #$F7
+dust:	STA dusty,X
+	DEX
+	BPL dust
+
 	RTS
 .endproc
 
@@ -433,7 +443,7 @@ palettes:
 .byte $21, $0C, $30, $27
 .byte $21, $0C, $16, $27
 .byte $21, $1C, $29, $32
-.byte $21, $0C, $30, $27
+.byte $21, $00, $10, $20
 
 .import lv1
 .import lv2

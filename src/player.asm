@@ -1,5 +1,7 @@
 .include "constants.inc"
 
+.import cdust, dustd, dustx, dusty, dustv
+
 .segment "CODE"
 	;; inputs:
 	;; * X: player spawn x coord
@@ -45,25 +47,25 @@
 	ROR A
 	ROR A
 	ROR A
-	STA $0202
-	STA $0206
-	STA $020A
-	STA $020E
+	STA PLAYER_OAM + $02
+	STA PLAYER_OAM + $06
+	STA PLAYER_OAM + $0A
+	STA PLAYER_OAM + $0E
 	AND #$40
 	BNE leftface
 	LDA player_tile
 	CLC
 	ADC player_base
-	STA $0201
+	STA PLAYER_OAM + $01
 	CLC
 	ADC #$01
-	STA $0205
+	STA PLAYER_OAM + $05
 	CLC
 	ADC #$0F
-	STA $0209
+	STA PLAYER_OAM + $09
 	CLC
 	ADC #$01
-	STA $020D
+	STA PLAYER_OAM + $0D
 	JMP placed
 leftface:
 	LDA player_base
@@ -79,35 +81,35 @@ notham:
 eitherway:
 	CLC
 	ADC player_base
-	STA $0205
+	STA PLAYER_OAM + $05
 	CLC
 	ADC #$01
-	STA $0201
+	STA PLAYER_OAM + $01
 	CLC
 	ADC #$0F
-	STA $020D
+	STA PLAYER_OAM + $0D
 	CLC
 	ADC #$01
-	STA $0209
+	STA PLAYER_OAM + $09
 
 placed: ;; remember the camera is offset; account for that here
 	LDA player_y
 	ORA player_overy
-	STA $0200
-	STA $0204
+	STA PLAYER_OAM + $00
+	STA PLAYER_OAM + $04
 	CLC
 	LDA player_y
 	ADC #$08
 	ORA player_overy
-	STA $0208
-	STA $020C
+	STA PLAYER_OAM + $08
+	STA PLAYER_OAM + $0C
 	LDA player_x
-	STA $0207
-	STA $020F
+	STA PLAYER_OAM + $07
+	STA PLAYER_OAM + $0F
 	SEC
 	SBC #$08
-	STA $0203
-	STA $020B
+	STA PLAYER_OAM + $03
+	STA PLAYER_OAM + $0B
 
 	; restore registers
 	PLA
@@ -124,10 +126,13 @@ placed: ;; remember the camera is offset; account for that here
 	TYA
 	PHA
 
-	DEC jbuff
+	DEC dustcd
+	BPL nodcd
+	INC dustcd
+nodcd:	DEC jbuff
 	BPL norj
 	INC jbuff
-norj:   DEC coyote
+norj:	DEC coyote
 	BPL norc
 	INC coyote
 norc:
@@ -316,7 +321,13 @@ dcolld: LDA player_y
 	CLC
 	ADC #$08
 	STA player_y
-	LDA #$00
+	LDA player_vy + 1
+	CMP #$0E
+	BMI nodust
+	LDA player_x
+	LDY #$00
+	JSR mkdust
+nodust:	LDA #$00
 	STA player_suby
 	STA player_vy
 	STA player_vy + 1
@@ -385,6 +396,26 @@ lefted: LDA player_vx + 1
 	LDA #$FE
 	STA player_vx + 1
 lset:
+	;; maybe dust
+	LDA dustcd
+	BNE noldust
+	LDA coyote
+	BEQ noldust
+	LDA player_vx + 1
+	CMP #$01
+	BMI noldust
+	LDA player_x
+	CLC
+	ADC #$0C
+	BCC doldust
+	LDA #$FC
+doldust:
+	LDY #$10
+	JSR mkdust
+	LDA #$02
+	STA dustcd
+noldust:
+
 	JMP endhrz
 noleft: LDA #BTN_RIGHT
 	BIT buttons
@@ -409,6 +440,28 @@ rghted: LDA player_vx + 1
 	LDA #$00
 	STA player_vx
 rset:
+	;; maybe dust
+	LDA dustcd
+	BNE nordust
+	LDA coyote
+	BEQ nordust
+	LDA player_vx + 1
+	CMP #$FF
+	BPL nordust
+	LDA player_x
+	SEC
+	SBC #$10
+	BCS dordust
+	LDA #$00
+dordust:
+	CLC
+	ADC #$04
+	LDY #$20
+	JSR mkdust
+	LDA #$02
+	STA dustcd
+nordust:
+
 	JMP endhrz
 norght:
 	LDA player_state
@@ -540,6 +593,27 @@ exit_subr:
 	RTS
 .endproc
 
+
+	;; A is xcoord, it is overwritten, other regs are unchanged
+.proc mkdust
+	STX temp
+	LDX cdust
+	STA dustx,X
+	TYA
+	STA dustd,X
+	LDA player_y
+	STA dusty,X
+	LDA #MAX_DUST
+	STA dustv,X
+	INX
+	TXA
+	AND #$0F
+	STA cdust
+	LDX temp
+	RTS
+.endproc
+
+
 .segment "RODATA"
 .export maxt
 maxt:
@@ -572,6 +646,7 @@ player_state: .res 1
 player_overy: .res 1
 temp: .res 1
 timer: .res 1
+dustcd: .res 1
 .importzp buttons
 .exportzp player_base, player_dir, player_tile
 .exportzp player_x, player_y, player_overy
