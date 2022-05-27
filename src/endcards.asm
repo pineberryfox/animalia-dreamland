@@ -15,7 +15,8 @@
 	LDA #$00
 	STA PPUMASK
 	LDY #$03
-ol:	TYA
+ol:	JSR wait_vblank
+	TYA
 	CLC
 	ADC #$20
 	BIT PPUSTATUS
@@ -28,6 +29,8 @@ il:	STA PPUDATA
 	BNE il
 	DEY
 	BPL ol
+	JSR wait_vblank
+	BIT PPUSTATUS
 	LDA #$23
 	STA PPUADDR
 	LDA #$C0
