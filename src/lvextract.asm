@@ -27,6 +27,7 @@
 	;; upper row
 	JSR rowread
 	JSR wait_vblank
+	JSR wait_vblank
 	BIT PPUSTATUS
 	LDA #$2C
 	STA PPUADDR
@@ -44,6 +45,7 @@ il:	LDA lefts,Y
 	LDA #$FF
 	STA currow
 	STA currow + 1
+	JSR wait_vblank
 
 dout:	JSR rowread
 	JSR wait_vblank
@@ -109,6 +111,7 @@ din:	LDA lefts,Y
 	;; bottom row
 	JSR rowread
 	JSR wait_vblank
+	JSR wait_vblank
 	BIT PPUSTATUS
 	LDA #$24
 	STA PPUADDR
@@ -126,6 +129,7 @@ iil:	LDA lefts,Y
 	LDA #$FF
 	STA currow
 	STA currow + 1
+	JSR wait_vblank
 
 uout:	JSR rowread
 	JSR wait_vblank
