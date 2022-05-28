@@ -9,6 +9,8 @@
 .importzp buttons, player_base, player_dir, player_tile
 .importzp level, timer, player_x, player_y, player_overy
 
+.import advance_audio
+
 .segment "CODE"
 
 .proc clear2000
@@ -46,9 +48,23 @@ wpal:	STA PPUDATA
 .endproc
 
 
+.proc clearOAM
+	LDA #$FF
+	LDX #$00
+loop:	STA $200,X
+	INX
+	INX
+	INX
+	INX
+	BNE loop
+	RTS
+.endproc
+
+
 .export logoscreen
 .proc logoscreen
 	JSR clear2000
+	JSR clearOAM
 	LDA #$00
 	BIT PPUSTATUS
 	STA PPUMASK
@@ -149,6 +165,7 @@ lp:	JSR wait_vblank
 .export titlescreen
 .proc titlescreen
 	JSR clear2000
+	JSR clearOAM
 	JSR wait_vblank
 	LDA #$00
 	STA cheatpos
@@ -222,6 +239,7 @@ endst:
 getkey:	INC srandr
 	JSR wait_vblank
 	JSR readjoy
+	JSR advance_audio
 	LDA prevbuttons
 	EOR #$FF
 	AND buttons
@@ -246,6 +264,7 @@ no_cheat:
 	AND #(BTN_A | BTN_B | BTN_START)
 	BIT buttons
 	BEQ getkey
+
 	LDX srandr
 	LDY should_srand
 	BEQ no_srand
@@ -355,6 +374,7 @@ colondot:
 	;; and display the timer under the bed
 .proc win_or_lose
 	JSR clear2000
+	JSR clearOAM
 	LDX #$00
 	STX PPUMASK
 	STX player_tile
@@ -370,12 +390,6 @@ colondot:
 	STA player_x
 	LDA #$78
 	STA player_y
-	LDA #$FF
-	TAX
-	INX
-lp:	STA $200,X
-	DEX
-	BNE lp
 
 	LDA #$23
 	STA PPUADDR
@@ -577,6 +591,7 @@ key:	JSR wait_vblank
 	BIT cheat + 2
 	BEQ end
 	JSR wait_vblank
+	JSR advance_audio
 	BIT PPUSTATUS
 	LDA #$3F
 	STA PPUADDR

@@ -49,6 +49,7 @@ end:
 	RTI
 .endproc
 
+.import init_apu
 .import lvextract
 .import rand
 .import srand
@@ -63,6 +64,7 @@ end:
 
 .export main
 .proc main
+	JSR init_apu
 	LDX #$00
 	STX srandr
 	STX frame
@@ -95,6 +97,20 @@ vblankwait: ; wait for another vblank before continuing
 
 	LDA #$FF
 	STA should_srand
+
+	.import song, testsong_pulse, testsong_tri
+	.importzp duration
+	LDA #<testsong_pulse
+	STA song
+	LDA #>testsong_pulse
+	STA song + 1
+	LDA #<testsong_tri
+	STA song + 2
+	LDA #>testsong_tri
+	STA song + 3
+	LDA #$01
+	STA duration
+	STA duration + 1
 mainloop:
 	JSR titlescreen
 	JSR threelevel

@@ -23,6 +23,8 @@ clear_oam:
 	INX
 	INX
 	BNE clear_oam
+	DEX
+	TXS
 
 	JMP main
 .endproc
