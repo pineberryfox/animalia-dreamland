@@ -1,6 +1,7 @@
 .include "constants.inc"
 .include "fontmap.inc"
 
+.import load_song, load_sfx
 .import readjoy, srand, udiv16o8, wait_vblank
 .import draw_player, update_player
 .import fake_level_for_end, player_vx, player_vy, prevbuttons
@@ -8,6 +9,7 @@
 .import should_srand
 .importzp buttons, player_base, player_dir, player_tile
 .importzp level, timer, player_x, player_y, player_overy
+.import load_sfx
 
 .import advance_audio
 
@@ -164,6 +166,10 @@ lp:	JSR wait_vblank
 
 .export titlescreen
 .proc titlescreen
+	LDA #$FF
+	JSR load_song
+	LDA #$FF
+	JSR load_sfx
 	JSR clear2000
 	JSR clearOAM
 	JSR wait_vblank
@@ -272,6 +278,15 @@ no_cheat:
 	STA should_srand
 	JSR srand
 no_srand:
+
+	LDA #$02
+	JSR load_sfx
+	LDX #$0A
+sfxl:	JSR wait_vblank
+	JSR advance_audio
+	DEX
+	BNE sfxl
+
 	JSR wait_vblank
 	JSR clear2000
 	JSR wait_vblank
@@ -373,6 +388,8 @@ colondot:
 	;; clear the screen, draw the bed
 	;; and display the timer under the bed
 .proc win_or_lose
+	LDA #$FF
+	JSR load_song
 	JSR clear2000
 	JSR clearOAM
 	LDX #$00
@@ -599,6 +616,8 @@ key:	JSR wait_vblank
 	STA PPUADDR
 	LDA #$25
 	STA PPUDATA
+	LDA #$01
+	JSR load_sfx
 end:	LDA #$00
 	STA cheatpos
 	RTS

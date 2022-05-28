@@ -3,6 +3,7 @@
 .include "header.inc"
 
 .import logoscreen, titlescreen, winscreen, losescreen
+.import prevbuttons
 
 .segment "CODE"
 .proc irq_handler
@@ -98,19 +99,6 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #$FF
 	STA should_srand
 
-	.import song, testsong_pulse, testsong_tri
-	.importzp duration
-	LDA #<testsong_pulse
-	STA song
-	LDA #>testsong_pulse
-	STA song + 1
-	LDA #<testsong_tri
-	STA song + 2
-	LDA #>testsong_tri
-	STA song + 3
-	LDA #$01
-	STA duration
-	STA duration + 1
 mainloop:
 	JSR titlescreen
 	JSR threelevel
@@ -164,17 +152,17 @@ shuf:	INX
 	STA timer + 2
 	;; play three levels
 	LDA level_list
-	JSR loadlevel
+	JSR load_level
 	JSR maingame
 	CPY #$00
 	BEQ end
 	LDA level_list + 1
-	JSR loadlevel
+	JSR load_level
 	JSR maingame
 	CPY #$00
 	BEQ end
 	LDA level_list + 2
-	JSR loadlevel
+	JSR load_level
 	JSR maingame
 end:	RTS
 .endproc
@@ -182,14 +170,23 @@ end:	RTS
 	;; maingame returns a Boolean for whether we won or not in Y
 .importzp cy, player_overy
 .import draw_dusts, update_dusts
+.import advance_audio, load_sfx
 .proc maingame
 	LDA #$00
+	STA sfx_to_play
 	STA frame
 	JSR draw_player
 	JSR draw_crystals
 	JSR draw_dusts
 	JSR readjoy
-	JSR update_player
+	LDA prevbuttons
+	EOR #$FF
+	AND #BTN_START
+	BIT buttons
+	BEQ cont
+	JSR pause_screen
+	JMP maingame
+cont:	JSR update_player
 	JSR crystal_get
 	JSR update_dusts
 	LDA cy
@@ -203,6 +200,10 @@ end:	RTS
 	LDX player_overy
 	DEX
 	BPL end
+	LDA sfx_to_play
+	BEQ nosfx
+	JSR load_sfx
+nosfx:	JSR advance_audio
 	JSR wait_vblank
 	LDX #$00
 	LDA #60
@@ -220,12 +221,24 @@ end:	RTS
 	BPL fin
 	STA timer + 2
 fin:	JMP maingame
-end:	RTS
+	JSR update_player
+	JSR wait_vblank
+	JSR draw_player
+end:	LDA sfx_to_play
+	BEQ nosfx2
+nosfx2:	JSR load_sfx
+	RTS
 .endproc
 
 	;; which level? the contents of A
 .import dusty, last_level, levels
-.proc loadlevel
+.import load_song
+.proc load_level
+	PHA
+	JSR load_song
+	LDA #$FF
+	JSR load_sfx
+	PLA
 	LDX #$0E
 	STX PPUMASK
 
@@ -441,6 +454,18 @@ cont:	DEX
 	RTS
 .endproc
 
+.proc pause_screen
+	JSR init_apu
+key:	JSR wait_vblank
+	JSR readjoy
+	LDA prevbuttons
+	EOR #$FF
+	AND #BTN_START
+	BIT buttons
+	BEQ key
+	RTS
+.endproc
+
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
@@ -480,8 +505,9 @@ srandr: .res 1
 .import airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
+sfx_to_play: .res 1
 ready: .res 1
 frame: .res 1
 timer: .res 3
-.exportzp ready, timer
+.exportzp ready, timer, sfx_to_play
 .importzp buttons, level, player_base

@@ -1,5 +1,7 @@
 .include "constants.inc"
 
+.importzp sfx_to_play
+
 .segment "CODE"
 .import temp
 .export draw_crystals
@@ -64,6 +66,8 @@ nonegx: CMP #$0B
 	BPL end
 	STA temp
 	LDA cy,X
+	CMP #$FF
+	BEQ end
 	SEC
 	SBC player_y
 	BPL nonegy
@@ -77,6 +81,8 @@ nonegy: CMP #$0D
 	BPL end
 	LDY #$FF
 	STY cy,X
+	LDA #$02
+	STA sfx_to_play
 end:    DEX
 	BPL cloop
 notouchy:

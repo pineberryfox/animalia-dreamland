@@ -14,6 +14,7 @@
 	STA player_tile
 	STA player_dir
 	LDA #$00
+	STA cdust
 	STA player_state
 	STA player_vx
 	STA player_vx + 1
@@ -117,6 +118,8 @@ placed: ;; remember the camera is offset; account for that here
 	RTS
 .endproc
 
+.importzp sfx_to_play
+.import sfx_playing
 .export update_player
 .proc update_player
 	PHP
@@ -238,7 +241,15 @@ birdj:  LDA jumpforce
 	LDA jumpforce + 1
 	ADC player_vy + 1
 	STA player_vy + 1
-endj:   LDA #$00
+endj:   LDA sfx_playing
+	BNE nojumpsfx
+	LDA #$03
+	LDX coyote
+	BEQ play
+	AND #$01
+play:	STA sfx_to_play
+nojumpsfx:
+	LDA #$00
 	STA jbuff
 	STA coyote
 nojump:
@@ -609,7 +620,11 @@ exit_subr:
 	TXA
 	AND #$0F
 	STA cdust
-	LDX temp
+	LDA sfx_playing
+	BNE end
+	LDA #$03
+	STA sfx_to_play
+end:	LDX temp
 	RTS
 .endproc
 
