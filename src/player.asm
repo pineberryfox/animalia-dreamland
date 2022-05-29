@@ -1,6 +1,6 @@
 .include "constants.inc"
 
-.import cdust, dustd, dustx, dusty, dustv
+.importzp cdust, dustd, dustx, dusty, dustv
 
 .segment "CODE"
 	;; inputs:
@@ -119,7 +119,7 @@ placed: ;; remember the camera is offset; account for that here
 .endproc
 
 .importzp sfx_to_play
-.import sfx_playing
+.importzp sfx_playing
 .export update_player
 .proc update_player
 	PHP
@@ -634,7 +634,7 @@ end:	LDX temp
 maxt:
 .byte $04
 
-.segment "BSS"
+.segment "ZEROPAGE"
 coyote: .res 1
 jbuff: .res 1
 vterm: .res 1
@@ -647,9 +647,9 @@ fric: .res 1
 airfric: .res 1
 efric: .res 1
 grav: .res 1
-.export airfric, fric, grav, jumpforce
-.export player_vx, player_vy
-.import prevbuttons
+.exportzp airfric, fric, grav, jumpforce
+.exportzp player_vx, player_vy
+.importzp prevbuttons
 
 .segment "ZEROPAGE"
 player_x: .res 1

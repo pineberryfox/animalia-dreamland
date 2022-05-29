@@ -348,7 +348,7 @@ rtlx2:	STY rights,X
 	BNE rtl2
 .endproc
 
-.segment "BSS"
+.segment "ZEROPAGE"
 currow:  .res 2
 prevrow: .res 2
 toadd:   .res 1

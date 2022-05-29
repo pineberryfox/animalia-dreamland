@@ -4,9 +4,10 @@
 .import load_song, load_sfx
 .import readjoy, srand, udiv16o8, wait_vblank
 .import draw_player, update_player
-.import fake_level_for_end, player_vx, player_vy, prevbuttons
-.import camx, deltat, deltay, dividend, divisor, temp, remainder, srandr
-.import should_srand
+.import fake_level_for_end
+.importzp player_vx, player_vy, prevbuttons
+.importzp camx, deltat, deltay, dividend, divisor, temp, remainder, srandr
+.importzp should_srand
 .importzp buttons, player_base, player_dir, player_tile
 .importzp level, timer, player_x, player_y, player_overy
 .import load_sfx
@@ -636,7 +637,7 @@ game_over:
 .asciiz "Game Over"
 
 
-.segment "BSS"
+.segment "ZEROPAGE"
 timerstr: .res 9
 .align 16
 cheat: .res 16

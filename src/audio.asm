@@ -196,7 +196,7 @@ end:	LDA #$01
 	LDA #$00
 	STA playing,X
 	TAY
-	LDA $80
+	LDA #$80
 	STA (base),Y
 	RTS
 .endproc
@@ -280,8 +280,8 @@ period_table_hi:
 	.byte $00, $00, $00, $00, $00, $00, $00, $00
 
 
-.segment "BSS"
-.export duration,song,sfx,sfx_playing
+.segment "ZEROPAGE"
+.exportzp duration,song,sfx,sfx_playing
 command: .res 2
 channel: .res 1
 duration: .res 3
@@ -299,7 +299,6 @@ temp: .res 1
 base: .res 2
 
 .segment "RODATA"
-.export testsong_pulse, testsong_tri
 SCALEBASE = 1*12+7
 BASEDUR = 12
 CMD_SHAPE = $F9

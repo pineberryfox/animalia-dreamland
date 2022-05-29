@@ -20,9 +20,9 @@ loop:
 	RTS
 .endproc
 
-.segment "BSS"
+.segment "ZEROPAGE"
 prevbuttons: .res 1
-.export prevbuttons
+.exportzp prevbuttons
 
 .segment "ZEROPAGE"
 buttons: .res 1

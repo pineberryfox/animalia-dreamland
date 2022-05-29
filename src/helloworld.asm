@@ -3,7 +3,7 @@
 .include "header.inc"
 
 .import logoscreen, titlescreen, winscreen, losescreen
-.import prevbuttons
+.importzp prevbuttons
 
 .segment "CODE"
 .proc irq_handler
@@ -231,7 +231,8 @@ nosfx2:	JSR load_sfx
 .endproc
 
 	;; which level? the contents of A
-.import dusty, last_level, levels
+.importzp dusty
+.import last_level, levels
 .import load_song
 .proc load_level
 	PHA
@@ -486,11 +487,7 @@ palettes:
 .byte $21, $1C, $29, $32
 .byte $21, $00, $10, $20
 
-.import lv1
-.import lv2
-.import lv3
-
-.segment "BSS"
+.segment "ZEROPAGE"
 should_srand: .res 1
 camx: .res 1
 deltat: .res 1
@@ -500,9 +497,9 @@ dividend: .res 2
 temp: ; shared with divisor
 divisor: .res 1
 srandr: .res 1
-.export camx, deltat, deltay, dividend, divisor, temp, remainder, srandr
-.export should_srand
-.import airfric, fric, grav, jumpforce
+.exportzp camx, deltat, deltay, dividend, divisor, temp, remainder, srandr
+.exportzp should_srand
+.importzp airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
 sfx_to_play: .res 1

@@ -8,7 +8,7 @@
 .o.nes:
 	ld65 $(.ALLSRC:M*.o) --cfg-path "${.CURDIR}" -C nes.cfg -m $(.TARGET:R).map -o $(.TARGET)
 
-helloworld.nes : helloworld.o endcards.o player.o crystal.o dust.o lvextract.o rand.o readjoy.o reset.o collide.o levels.o audio.o
+helloworld.nes : helloworld.o endcards.o player.o crystal.o dust.o lvextract.o rand.o readjoy.o reset.o collide.o levels.o audio.o nes.cfg
 
 audio.o : audio.asm constants.inc
 collide.o : collide.asm constants.inc

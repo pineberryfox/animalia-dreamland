@@ -45,10 +45,10 @@ end:	DEX
 	RTS
 .endproc
 
-.segment "BSS"
+.segment "ZEROPAGE"
 dustx: .res 16
 dusty: .res 16
 dustv: .res 16
 dustd: .res 16
 cdust: .res 1
-.export cdust, dustd, dustx, dusty, dustv
+.exportzp cdust, dustd, dustx, dusty, dustv

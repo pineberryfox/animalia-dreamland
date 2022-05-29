@@ -3,7 +3,7 @@
 .importzp sfx_to_play
 
 .segment "CODE"
-.import temp
+.importzp temp
 .export draw_crystals
 .proc draw_crystals
 	LDX #$03
