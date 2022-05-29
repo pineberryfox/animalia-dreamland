@@ -1,16 +1,21 @@
 .MAIN : helloworld.nes
-.SUFFIXES : .asm .inc .o .nes
-.PATH : $(.CURDIR) $(.CURDIR)/src $(.CURDIR)/src/levels
+.SUFFIXES : .asm .inc .level .o .nes
+.PATH : $(.CURDIR) $(.CURDIR)/src $(.CURDIR)/src/levels $(.CURDIR)/src/songs
 
 .asm.o:
-	ca65 $(.IMPSRC) --bin-include-dir "$(.CURDIR)/src/levels" -o $(.TARGET)
+	ca65 $(.IMPSRC) --bin-include-dir "$(.CURDIR)/src/levels" -I "$(.CURDIR)/src/songs" -o $(.TARGET)
 
 .o.nes:
 	ld65 $(.ALLSRC:M*.o) --cfg-path "${.CURDIR}" -C nes.cfg -m $(.TARGET:R).map -o $(.TARGET)
 
-helloworld.nes : helloworld.o endcards.o player.o crystal.o dust.o lvextract.o rand.o readjoy.o reset.o collide.o levels.o audio.o nes.cfg
+helloworld.nes : helloworld.o nes.cfg
+helloworld.nes : audio.o player.o collide.o crystal.o dust.o
+helloworld.nes : lvextract.o levels.o endcards.o
+helloworld.nes : rand.o readjoy.o reset.o
+helloworld.nes : songs.o man.o western.o spider.o rumble.o shimmer.o
+helloworld.nes : tower.o bubble.o
 
-audio.o : audio.asm constants.inc
+audio.o : audio.asm constants.inc notes.inc
 collide.o : collide.asm constants.inc
 crystal.o : crystal.asm constants.inc
 dust.o : dust.asm constants.inc
@@ -20,5 +25,15 @@ lvextract.o : lvextract.asm constants.inc
 player.o : player.asm constants.inc
 rand.o : rand.asm
 readjoy.o : readjoy.asm constants.inc
-levels.o : levels.asm claw.level closed.level hill.level man.level pup.level skyland.level spider.level towers.level
+levels.o : levels.asm claw.level closed.level hill.level
+levels.o : man.level pup.level skyland.level spider.level towers.level
 reset.o : reset.asm constants.inc
+songs.o : songs.asm
+
+man.o : man.asm notes.inc
+western.o : western.asm notes.inc
+spider.o : spider.asm notes.inc
+rumble.o : rumble.asm notes.inc
+shimmer.o : shimmer.asm notes.inc
+tower.o : tower.asm notes.inc
+bubble.o : bubble.asm notes.inc

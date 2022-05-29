@@ -346,6 +346,7 @@ rtlx2:	STY rights,X
 	DEX
 	ROL A
 	BNE rtl2
+	RTS
 .endproc
 
 .segment "ZEROPAGE"

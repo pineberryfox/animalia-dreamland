@@ -1,4 +1,7 @@
 .include "constants.inc"
+.include "notes.inc"
+
+.import melodies, bass
 
 .segment "CODE"
 
@@ -21,6 +24,11 @@ reset:	LDA apu_initial_state,Y
 
 .export advance_audio
 .proc advance_audio
+	PHA
+	TXA
+	PHA
+	TYA
+	PHA
 	LDA #$00
 	STA base
 	STA channel
@@ -73,6 +81,12 @@ reset:	LDA apu_initial_state,Y
 	STA sfx
 	LDA cursong + 1
 	STA sfx + 1
+
+	PLA
+	TAY
+	PLA
+	TAX
+	PLA
 	RTS
 .endproc
 .proc in_advance_audio
@@ -114,6 +128,7 @@ playnote:
 	STA cursong
 	LDA cursong + 1
 	ADC #$00
+	STA cursong + 1
 	RTS
 commands:
 	EOR #$FF
@@ -289,8 +304,8 @@ song: .res 4
 sfx:  .res 2
 volume_flags: .res 3
 shape: .res 3
-playing: .res 2
-sfx_playing: .res 1
+playing: .res 2      ;\___ these are one unit
+sfx_playing: .res 1  ;/
 
 .segment "ZEROPAGE"
 cursong: .res 2
@@ -299,55 +314,6 @@ temp: .res 1
 base: .res 2
 
 .segment "RODATA"
-SCALEBASE = 1*12+7
-BASEDUR = 12
-CMD_SHAPE = $F9
-CMD_DECAY_OFF = $FA
-CMD_DECAY_ON = $FB
-CMD_SUSTAIN_OFF = $FC
-CMD_SUSTAIN_ON = $FD
-testsong_pulse:
-	.byte CMD_SHAPE, $8F
-	.byte CMD_DECAY_OFF
-	.byte CMD_SUSTAIN_OFF
-	.byte SCALEBASE + $00, BASEDUR
-	.byte SCALEBASE + $0A, BASEDUR
-	.byte CMD_SUSTAIN_ON
-	.byte SCALEBASE + $0C, BASEDUR
-	.byte CMD_SUSTAIN_OFF
-	.byte SCALEBASE + $12, BASEDUR
-	.byte SCALEBASE + $11, BASEDUR
-	.byte SCALEBASE + $0F, BASEDUR
-	.byte CMD_SUSTAIN_ON
-	.byte SCALEBASE + $0D, BASEDUR
-	.byte CMD_SUSTAIN_OFF
-	.byte SCALEBASE + $0C, BASEDUR
-	.byte SCALEBASE + $00, BASEDUR
-	.byte SCALEBASE + $0A, BASEDUR
-	.byte SCALEBASE + $0C, BASEDUR
-	.byte SCALEBASE + $0F, BASEDUR
-	.byte SCALEBASE + $00, BASEDUR
-	.byte SCALEBASE + $08, BASEDUR
-	.byte CMD_SUSTAIN_ON
-	.byte SCALEBASE + $0A, BASEDUR
-	.byte CMD_DECAY_ON
-	.byte SCALEBASE + $01, BASEDUR
-	.byte CMD_SUSTAIN_OFF
-	.byte $FE
-	.word testsong_pulse
-
-testsong_tri:
-	.byte CMD_SHAPE, $FF
-	.byte SCALEBASE +12+ $00, BASEDUR * 4
-	.byte SCALEBASE +12+ $03, BASEDUR * 4
-	.byte SCALEBASE +12+ $00, BASEDUR * 4
-	.byte SCALEBASE    + $0A, BASEDUR
-	.byte SCALEBASE    + $05, BASEDUR
-	.byte SCALEBASE    + $06, BASEDUR
-	.byte SCALEBASE    + $0C, BASEDUR
-	.byte $FE
-	.word testsong_tri
-
 
 JUMP_BASE = 2*12+1
 sfx_jump:
@@ -360,7 +326,7 @@ sfx_jump:
 	.byte JUMP_BASE+6, 1
 	.byte JUMP_BASE+9, 1
 	.byte JUMP_BASE+12, 1
-	.byte $FF
+	.byte CMD_STOP
 
 sfx_pickup:
 	.byte CMD_SHAPE, $02
@@ -380,7 +346,8 @@ sfx_pickup:
 	.byte 3*12+6, 1
 	.byte CMD_SHAPE, $CF
 	.byte 4*12+3, 1
-silence: .byte $FF
+.export silence
+silence: .byte CMD_STOP
 
 sfx_shwp:
 	.byte CMD_SHAPE, $0F
@@ -390,22 +357,10 @@ sfx_shwp:
 	.byte 6, 1
 	.byte 8, 1
 	.byte 5, 1
-	.byte $FF
+	.byte CMD_STOP
 
 
 
 .segment "RODATA"
-melodies:
-	.word testsong_pulse, testsong_pulse, testsong_pulse, testsong_pulse
-	.word testsong_pulse, testsong_pulse, testsong_pulse, testsong_pulse
-	.word testsong_pulse, testsong_pulse, testsong_pulse, testsong_pulse
-	.word testsong_pulse, testsong_pulse, testsong_pulse, testsong_pulse
-
-bass:
-	.word testsong_tri, testsong_tri, testsong_tri, testsong_tri
-	.word testsong_tri, testsong_tri, testsong_tri, testsong_tri
-	.word testsong_tri, testsong_tri, testsong_tri, testsong_tri
-	.word testsong_tri, testsong_tri, testsong_tri, testsong_tri
-
 sfx_list:
 	.word silence, sfx_jump, sfx_pickup, sfx_shwp

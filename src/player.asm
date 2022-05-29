@@ -631,8 +631,7 @@ end:	LDX temp
 
 .segment "RODATA"
 .export maxt
-maxt:
-.byte $04
+maxt:	.byte $04
 
 .segment "ZEROPAGE"
 coyote: .res 1

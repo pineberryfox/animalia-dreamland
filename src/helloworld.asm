@@ -99,6 +99,13 @@ vblankwait: ; wait for another vblank before continuing
 	LDA #$FF
 	STA should_srand
 
+	;; reshuffle the level list each time
+	;; without reinitializing
+	LDX last_level
+prefill:TXA
+	STA level_list,X
+	DEX
+	BPL prefill
 mainloop:
 	JSR titlescreen
 	JSR threelevel
@@ -114,13 +121,6 @@ won:	JSR winscreen
 .proc threelevel
 	;; Fisher-Yates the level list
 	LDX last_level
-prefill:TXA
-	STA level_list,X
-	DEX
-	BPL prefill
-
-	LDX last_level
-	DEX
 shuf:	INX
 	TXA
 	PHA
@@ -221,13 +221,7 @@ nosfx:	JSR advance_audio
 	BPL fin
 	STA timer + 2
 fin:	JMP maingame
-	JSR update_player
-	JSR wait_vblank
-	JSR draw_player
-end:	LDA sfx_to_play
-	BEQ nosfx2
-nosfx2:	JSR load_sfx
-	RTS
+end:	RTS
 .endproc
 
 	;; which level? the contents of A
