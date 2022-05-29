@@ -13,7 +13,7 @@ helloworld.nes : audio.o player.o collide.o crystal.o dust.o
 helloworld.nes : lvextract.o levels.o endcards.o
 helloworld.nes : rand.o readjoy.o reset.o
 helloworld.nes : songs.o man.o western.o spider.o rumble.o shimmer.o
-helloworld.nes : tower.o bubble.o
+helloworld.nes : tower.o bubble.o split.o wompwomp.o victory.o
 
 audio.o : audio.asm constants.inc notes.inc
 collide.o : collide.asm constants.inc
@@ -37,3 +37,6 @@ rumble.o : rumble.asm notes.inc
 shimmer.o : shimmer.asm notes.inc
 tower.o : tower.asm notes.inc
 bubble.o : bubble.asm notes.inc
+split.o : split.asm notes.inc
+wompwomp.o : wompwomp.asm notes.inc
+victory.o : victory.asm notes.inc

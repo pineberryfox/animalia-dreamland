@@ -10,6 +10,7 @@
 .importzp should_srand
 .importzp buttons, player_base, player_dir, player_tile
 .importzp level, timer, player_x, player_y, player_overy
+.importzp lose_song, win_song
 .import load_sfx
 
 .import advance_audio
@@ -492,6 +493,8 @@ tstr:	LDA timerstr,Y
 .proc winscreen
 	JSR fill_timerstr
 	JSR win_or_lose
+	LDA #win_song
+	JSR load_song
 
 	JSR draw_player
 
@@ -501,6 +504,7 @@ tstr:	LDA timerstr,Y
 	STA PPUMASK
 	LDX #$40
 cd:	JSR wait_vblank
+	JSR advance_audio
 	DEX
 	BNE cd
 
@@ -520,6 +524,7 @@ key:	JSR wait_vblank
 	LDA temp
 	STA buttons
 	JSR readjoy
+	JSR advance_audio
 	LDA buttons
 	STA temp
 	LDA prevbuttons
@@ -557,6 +562,8 @@ copy:	LDA game_over,X
 	INX
 	JMP copy
 endl:	JSR win_or_lose
+	LDA #lose_song
+	JSR load_song
 
 	LDA #$22
 	STA PPUADDR
@@ -585,10 +592,12 @@ endl:	JSR win_or_lose
 	STA PPUMASK
 	LDX #$40
 cd:	JSR wait_vblank
+	JSR advance_audio
 	DEX
 	BNE cd
 
 key:	JSR wait_vblank
+	JSR advance_audio
 	JSR readjoy
 	LDA prevbuttons
 	EOR #$FF
