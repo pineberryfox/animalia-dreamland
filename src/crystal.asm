@@ -72,7 +72,7 @@ nonegx: CMP #$0B
 	SBC player_y
 	BPL nonegy
 	EOR #$FF ; see above
-nonegy: CMP #$0D
+nonegy: CMP #$0A
 	BPL end
 	LSR A
 	CLC

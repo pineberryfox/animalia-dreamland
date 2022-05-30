@@ -33,9 +33,21 @@ levels:
 .incbin "ladle.level"
 .byte "     Ladle     "
 
+.incbin "cow.level"
+.byte " Blessed Bovine"
+
+.incbin "mirror.level"
+.byte "  Mirror Ball  "
+
+.incbin "silhouettes.level"
+.byte "  Silhouettes  "
+
+.incbin "checkers.level"
+.byte "Game In The Sky"
+
 end_of_real_levels:
-	;; then Gauntlet and so on are special levels
-	;; which appear only in all-levels mode
+	;; then Gauntlet is a special level
+	;; which appears only in all-levels mode
 .incbin "gauntlet.level"
 .byte "    Gauntlet   "
 
@@ -53,7 +65,7 @@ last_level: .byte (end_of_real_levels - levels)/48 - 1
 
 .export ordered_levels
 ordered_levels:
-.byte 0, 2, 5, 7, 4, 8, 3, 6, 1
+.byte 0, 2, 5, 9, 7, 4, 8, 3, 6, 1
 .byte (end_of_real_levels - levels)/48 ; Gauntlet
 .byte $FF ; sentinel
 

@@ -28,7 +28,7 @@ rand.o : rand.asm
 readjoy.o : readjoy.asm constants.inc
 levels.o : levels.asm claw.level closed.level hill.level
 levels.o : man.level pup.level skyland.level spider.level towers.level
-levels.o : ladle.level
+levels.o : ladle.level cow.level silhouettes.level checkers.level
 levels.o : gauntlet.level
 reset.o : reset.asm constants.inc
 songs.o : songs.asm

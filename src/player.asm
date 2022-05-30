@@ -311,7 +311,9 @@ chkycoll:
 	LDA player_y
 	CLC
 	ADC #$08
-	TAY
+	BCC nov1
+	LDA #$FF
+nov1:	TAY
 	JSR collide
 	BNE dcolld
 	LDA player_x
@@ -321,7 +323,9 @@ chkycoll:
 	LDA player_y
 	CLC
 	ADC #$08
-	TAY
+	BCC nov2
+	LDA #$FF
+nov2:	TAY
 	JSR collide
 	BNE dcolld
 	JMP endCollV

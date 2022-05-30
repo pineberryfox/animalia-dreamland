@@ -28,6 +28,10 @@ melodies:
 .word rumble_pulse ; closed off
 .word tower_pulse ; two towers
 .word ladle_pulse ; ladle
+.word silence ; blessed bovine
+.word silence ; mirror ball
+.word silence ; silhouttes
+.word silence ; game in the sky
 	;; the last of the real level songs has to be guantlet
 .word villain_pulse ; guantlet
 lose_song_loc:
@@ -46,6 +50,10 @@ bass:
 .word rumble_tri ; closed off
 .word tower_tri ; two towers
 .word ladle_tri ; ladle
+.word silence ; blessed bovine
+.word silence ; mirror ball
+.word silence ; silhouttes
+.word silence ; game in the sky
 .word villain_tri ; guantlet
 .word wompwomp_tri ; lost
 .word victory_tri ; won
