@@ -10,6 +10,7 @@
 .import wompwomp_pulse,wompwomp_tri
 .import victory_pulse,victory_tri
 .import villain_pulse,villain_tri
+.import ladle_pulse,ladle_tri
 
 .exportzp lose_song = <((lose_song_loc - melodies) / 2)
 .exportzp win_song  = <((win_song_loc  - melodies) / 2)
@@ -26,6 +27,7 @@ melodies:
 .word western_pulse ; pup
 .word rumble_pulse ; closed off
 .word tower_pulse ; two towers
+.word ladle_pulse ; ladle
 	;; the last of the real level songs has to be guantlet
 .word villain_pulse ; guantlet
 lose_song_loc:
@@ -43,6 +45,7 @@ bass:
 .word western_tri ; pup
 .word rumble_tri ; closed off
 .word tower_tri ; two towers
-.word villain_pulse ; guantlet
-.word wompwomp_pulse ; lost
-.word victory_pulse ; won
+.word ladle_tri ; ladle
+.word villain_tri ; guantlet
+.word wompwomp_tri ; lost
+.word victory_tri ; won

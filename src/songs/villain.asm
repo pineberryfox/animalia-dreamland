@@ -13,6 +13,7 @@ wholedot = whole + half
 villain_pulse:
 	.byte CMD_SHAPE, $4F
 	.byte CMD_DECAY_ON, CMD_SUSTAIN_OFF
+villain_inner:
 	.byte F2, eighth
 	.byte E2, eighth
 	.byte A1, eighth
@@ -22,28 +23,10 @@ villain_pulse:
 	.byte C2, eighth
 	.byte B1, eighth
 	.byte CMD_JUMP
-	.word villain_pulse
+	.word villain_inner
 
 
 villain_tri:
-	.byte CMD_SHAPE, $00
-	.byte rest, 2*whole + quarter
 	.byte CMD_SHAPE, $FF
-	.byte A4, whole
-	.byte E5, whole - 2
-	.byte F5, 2
-	.byte G5, half
-	.byte Gb5, whole
-	.byte F5, quarter
-	.byte Gb5, quarter
-
-	.byte F5, whole
-	.byte E5, half
-	.byte C5, half
-	.byte D5, half
-	.byte C5, quarter
-	.byte B4, quarter
-	.byte G4, quarter
-	.byte A4, half
 	.byte CMD_JUMP
-	.word villain_tri
+	.word villain_inner
