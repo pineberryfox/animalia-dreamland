@@ -30,14 +30,11 @@ levels:
 .incbin "towers.level"
 .byte "   Two Towers  "
 
-	;; there should always be a number of levels
-	;; equal to some power of 2.
-	;; last_level is the zero-based index of the final one.
-	;; that is, the binary form of the number should
-	;; begin with a stream of zeros
-	;; and end with a stream of ones
-.export last_level
-last_level: .byte (last_level - levels)/48 - 1
+end_of_real_levels:
+	;; then Gauntlet and so on are special levels
+	;; which appear only in all-levels mode
+.incbin "gauntlet.level"
+.byte "    Gauntlet   "
 
 .export fake_level_for_end
 fake_level_for_end:
@@ -45,7 +42,19 @@ fake_level_for_end:
 .byte $00, $00, $00, $00, $01, $80, $00, $00, $00, $00, $00, $00
 .byte $00, $00
 
+
+	;; last_level is the zero-based index of the final real level.
+.export last_level
+last_level: .byte (end_of_real_levels - levels)/48 - 1
+
+
+.export ordered_levels
+ordered_levels:
+.byte 0, 2, 5, 7, 4, 3, 6, 1
+.byte (end_of_real_levels - levels)/48 ; Gauntlet
+.byte $FF ; sentinel
+
 .segment "BSS"
 .export level_list
 .align 16
-level_list: .res (last_level - levels)/48
+level_list: .res (end_of_real_levels - levels)/48

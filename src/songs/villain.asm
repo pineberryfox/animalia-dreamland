@@ -22,7 +22,7 @@ villain_pulse:
 	.byte C2, eighth
 	.byte B1, eighth
 	.byte CMD_JUMP
-	.word rumble_pulse
+	.word villain_pulse
 
 
 villain_tri:
@@ -46,4 +46,4 @@ villain_tri:
 	.byte G4, quarter
 	.byte A4, half
 	.byte CMD_JUMP
-	.word rumble_tri
+	.word villain_tri

@@ -218,20 +218,6 @@ tlb:	LDA title_word,Y
 	INY
 	JMP tlb
 endtitleword:
-	;; now add "press start"
-	LDA #$22
-	STA PPUADDR
-	LDA #$EA
-	STA PPUADDR
-	LDY #$00
-st:	LDA press_start,Y
-	BEQ endst
-	CLC
-	ADC #$60
-	STA PPUDATA
-	INY
-	JMP st
-endst:
 	;; BG colour
 	LDA #$0E
 	STA PPUMASK
@@ -244,9 +230,38 @@ endst:
 	LDA #$0C
 	STA PPUDATA
 
+	LDA #$22
+	STA PPUADDR
+	LDA #$AF
+	STA PPUADDR
+	LDY #$28
+	STY PPUDATA
+	LDA #$23
+	STA PPUADDR
+	LDA #$2F
+	STA PPUADDR
+	INY
+	STY PPUDATA
+
 getkey:	INC srandr
 	JSR wait_vblank
-	JSR readjoy
+	BIT mode
+	BPL lv3
+lvall:	JSR write_all
+	JMP joy
+lv3:	JSR write_three
+joy:	JSR readjoy
+	LDA prevbuttons
+	EOR #$FF
+	AND #(BTN_UP | BTN_DOWN)
+	BIT buttons
+	BEQ no_mode_change
+	LDA mode
+	EOR #MODE_ALL
+	STA mode
+	LDA #$03
+	JSR load_sfx
+no_mode_change:
 	JSR advance_audio
 	LDA prevbuttons
 	EOR #$FF
@@ -291,8 +306,39 @@ sfxl:	JSR wait_vblank
 
 	JSR wait_vblank
 	JSR clear2000
-	JSR wait_vblank
-	RTS
+	JMP wait_vblank ; tail-call
+.endproc
+
+.proc write_all
+	LDA #$22
+	STA PPUADDR
+	LDA #$EA
+	STA PPUADDR
+	LDY #$00
+st:	LDA all_levels_mode,Y
+	BEQ endst
+	CLC
+	ADC #$60
+	STA PPUDATA
+	INY
+	JMP st
+endst:	RTS
+.endproc
+
+.proc write_three
+	LDA #$22
+	STA PPUADDR
+	LDA #$EA
+	STA PPUADDR
+	LDY #$00
+st:	LDA three_levels_mode,Y
+	BEQ endst
+	CLC
+	ADC #$60
+	STA PPUDATA
+	INY
+	JMP st
+endst:	RTS
 .endproc
 
 
@@ -493,6 +539,16 @@ tstr:	LDA timerstr,Y
 .proc winscreen
 	JSR fill_timerstr
 	JSR win_or_lose
+	LDA mode
+	BPL nomedal
+	BIT PPUSTATUS
+	LDA #$22
+	STA PPUADDR
+	LDA #$EF
+	STA PPUADDR
+	LDA #$10
+	STA PPUDATA
+nomedal:
 	LDA #win_song
 	JSR load_song
 
@@ -640,12 +696,15 @@ logomark:
 .asciiz "Fox"
 title_word:
 .asciiz "SOMNIORUM"
-press_start:
-.asciiz "Press Start"
+three_levels_mode:
+.asciiz "Three Dreams"
+all_levels_mode:
+.asciiz " Full World "
 game_over:
 .asciiz "Game Over"
 
 
+.importzp mode
 .segment "ZEROPAGE"
 timerstr: .res 9
 .align 16

@@ -67,6 +67,7 @@ end:
 .proc main
 	JSR init_apu
 	LDX #$00
+	STX mode
 	STX srandr
 	STX frame
 	STX camx
@@ -108,12 +109,12 @@ prefill:TXA
 	BPL prefill
 mainloop:
 	JSR titlescreen
+	BIT mode
+	BMI play_everything
 	JSR threelevel
-	CPY #$00
-	BNE won
-lost:	JSR losescreen
 	JMP mainloop
-won:	JSR winscreen
+play_everything:
+	JSR all_levels
 	JMP mainloop
 .endproc
 
@@ -155,16 +156,40 @@ shuf:	INX
 	JSR load_level
 	JSR maingame
 	CPY #$00
-	BEQ end
+	BEQ lost
 	LDA level_list + 1
 	JSR load_level
 	JSR maingame
 	CPY #$00
-	BEQ end
+	BEQ lost
 	LDA level_list + 2
 	JSR load_level
 	JSR maingame
-end:	RTS
+	CPY #$00
+	BEQ lost
+	JMP winscreen ; tail-call, won't execute losescreen
+lost:	JMP losescreen ; tail-call
+.endproc
+
+.import ordered_levels
+.proc all_levels
+	LDA #$00
+	STA timer
+	STA timer + 1
+	STA timer + 2
+	STA all_level_progress
+
+lp:	LDX all_level_progress
+	LDA ordered_levels,X
+	CMP #$FF
+	BEQ win
+	JSR load_level
+	JSR maingame
+	CPY #$00
+	BEQ lp
+	INC all_level_progress
+	JMP lp
+win:	JMP winscreen
 .endproc
 
 	;; maingame returns a Boolean for whether we won or not in Y
@@ -284,12 +309,13 @@ lvmul:	CLC
 
 	;; assign species
 	JSR rand
-	AND #$07
+	AND #$1F
 	BNE next
-	LDA #$40
-next:	AND #$F8
-	ORA #$08
-	STA player_base ; either $08 or $48
+	LDA #$48
+	JMP speciesd
+next:	LDA #$08
+speciesd:
+	STA player_base
 
 	LDA #$00
 	STA buttons
@@ -496,9 +522,11 @@ srandr: .res 1
 .importzp airfric, fric, grav, jumpforce
 
 .segment "ZEROPAGE"
+mode: .res 1
+all_level_progress: .res 1
 sfx_to_play: .res 1
 ready: .res 1
 frame: .res 1
 timer: .res 3
-.exportzp ready, timer, sfx_to_play
+.exportzp ready, timer, sfx_to_play, mode
 .importzp buttons, level, player_base

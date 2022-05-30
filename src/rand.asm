@@ -26,8 +26,7 @@
 	STY entropy + 3
 	LDA #$00
 	STA entropy
-	JSR rand
-	RTS
+	JMP rand ; tail-call
 .endproc
 
 .segment "ZEROPAGE"

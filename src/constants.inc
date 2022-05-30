@@ -14,6 +14,8 @@ CRYSTAL_OAM = $0250
 DUST_OAM = $0200
 MAX_DUST = $0B
 
+MODE_ALL   = $80
+
 BTN_A      = $80
 BTN_B      = $40
 BTN_SELECT = $20
