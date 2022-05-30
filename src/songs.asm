@@ -32,6 +32,9 @@ melodies:
 .word silence ; mirror ball
 .word silence ; silhouttes
 .word silence ; game in the sky
+.word silence ; wall of shelves
+.word silence ; packed hat
+.word silence ; cloudy peaks
 	;; the last of the real level songs has to be guantlet
 .word villain_pulse ; guantlet
 lose_song_loc:
@@ -54,6 +57,9 @@ bass:
 .word silence ; mirror ball
 .word silence ; silhouttes
 .word silence ; game in the sky
+.word silence ; wall of shelves
+.word silence ; packed hat
+.word silence ; cloudy peaks
 .word villain_tri ; guantlet
 .word wompwomp_tri ; lost
 .word victory_tri ; won

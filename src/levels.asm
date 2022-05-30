@@ -45,6 +45,15 @@ levels:
 .incbin "checkers.level"
 .byte "Game In The Sky"
 
+.incbin "shelves.level"
+.byte "Wall of Shelves"
+
+.incbin "hat.level"
+.byte "   Packed Hat  "
+
+.incbin "peaks.level"
+.byte "  Cloudy Peaks "
+
 end_of_real_levels:
 	;; then Gauntlet is a special level
 	;; which appears only in all-levels mode
