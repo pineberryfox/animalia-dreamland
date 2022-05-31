@@ -154,7 +154,7 @@ shuf:	INX
 	LDA temp
 	STA level_list,X
 	DEX
-	CMP #$01
+	CPX #$01
 	BNE shuf
 
 	LDA #$00

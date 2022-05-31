@@ -1,4 +1,4 @@
-.MAIN : helloworld.nes
+.MAIN : animalia-dreamland.nes
 .SUFFIXES : .asm .inc .level .o .nes
 .PATH : $(.CURDIR) $(.CURDIR)/src $(.CURDIR)/src/levels $(.CURDIR)/src/songs
 
@@ -8,21 +8,26 @@
 .o.nes:
 	ld65 $(.ALLSRC:M*.o) --cfg-path "${.CURDIR}" -C nes.cfg -m $(.TARGET:R).map -o $(.TARGET)
 
-helloworld.nes : helloworld.o nes.cfg
-helloworld.nes : audio.o player.o collide.o crystal.o dust.o
-helloworld.nes : lvextract.o levels.o endcards.o
-helloworld.nes : rand.o readjoy.o reset.o
-helloworld.nes : songs.o man.o western.o spider.o rumble.o shimmer.o
-helloworld.nes : tower.o bubble.o split.o wompwomp.o victory.o villain.o
-helloworld.nes : ladle.o shelves.o swingy.o reach.o heroes.o possessor.o
-helloworld.nes : clouds.o cow.o
+animalia-dreamland.nes : main.o nes.cfg
+animalia-dreamland.nes : audio.o player.o collide.o crystal.o dust.o
+animalia-dreamland.nes : lvextract.o levels.o endcards.o
+animalia-dreamland.nes : rand.o readjoy.o reset.o
+animalia-dreamland.nes : songs.o
+animalia-dreamland.nes : bubble.o clouds.o cow.o heroes.o
+animalia-dreamland.nes : ladle.o man.o possessor.o reach.o
+animalia-dreamland.nes : rumble.o shelves.o shimmer.o spider.o
+animalia-dreamland.nes : split.o swingy.o tower.o victory.o
+animalia-dreamland.nes : villain.o western.o wompwomp.o
+animalia-dreamland.nes :
+	ld65 $(.ALLSRC:M*.o) --cfg-path "${.CURDIR}" -C nes.cfg -m $(.TARGET:R).map -o $(.TARGET)
+
 
 audio.o : audio.asm constants.inc notes.inc
 collide.o : collide.asm constants.inc
 crystal.o : crystal.asm constants.inc
 dust.o : dust.asm constants.inc
 endcards.o : constants.inc fontmap.inc
-helloworld.o : helloworld.asm constants.inc fontmap.inc header.inc abm.chr
+main.o : main.asm constants.inc fontmap.inc header.inc abm.chr
 lvextract.o : lvextract.asm constants.inc
 player.o : player.asm constants.inc
 rand.o : rand.asm
