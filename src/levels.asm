@@ -4,7 +4,6 @@
 	;; levels are a fixed 48 bytes in size
 	;; so get your index via multiplication and addition
 .export levels
-.align $100
 levels:
 .incbin "skyland.level"
 .byte "    Skyland    "
@@ -68,8 +67,7 @@ fake_level_for_end:
 
 
 	;; last_level is the zero-based index of the final real level.
-.export last_level
-last_level: .byte (end_of_real_levels - levels)/48 - 1
+.exportzp last_level = <((end_of_real_levels - levels)/48 - 1)
 
 
 .export ordered_levels

@@ -27,7 +27,7 @@ lvextract.o : lvextract.asm constants.inc
 player.o : player.asm constants.inc
 rand.o : rand.asm
 readjoy.o : readjoy.asm constants.inc
-levels.o : levels.asm claw.level closed.level hill.level
+levels.o : levels.asm claw.level closed.level hill.level mirror.level
 levels.o : man.level pup.level skyland.level spider.level towers.level
 levels.o : ladle.level cow.level silhouettes.level checkers.level
 levels.o : shelves.level hat.level peaks.level

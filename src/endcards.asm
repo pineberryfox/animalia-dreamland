@@ -168,6 +168,14 @@ lp:	JSR wait_vblank
 
 .export titlescreen
 .proc titlescreen
+	LDA deltat
+	SEC
+	SBC #MINJUMPT
+	STA deltat
+	LDA deltay
+	SEC
+	SBC #MINJUMPY
+	STA deltay
 	LDA #$FF
 	JSR load_song
 	LDA #$FF
@@ -226,20 +234,17 @@ endtitleword:
 	LDA #$0C
 	STA PPUDATA
 
-	LDA #$22
-	STA PPUADDR
-	LDA #$AF
-	STA PPUADDR
-	LDY #$27
-	STY PPUDATA
-	LDA #$23
-	STA PPUADDR
-	LDA #$2F
-	STA PPUADDR
-	INY
-	STY PPUDATA
+	JSR arrows_maybe
 
+	JSR lucidity_box
+
+	;; display everything
+	LDA #$1E
+	STA PPUMASK
+	LDA #$00
+	STA temp
 getkey:	INC srandr
+	JSR advance_audio
 	JSR wait_vblank
 	BIT mode
 	BPL lv3
@@ -247,37 +252,30 @@ lvall:	JSR write_all
 	JMP joy
 lv3:	JSR write_three
 joy:	JSR readjoy
-	LDA prevbuttons
-	EOR #$FF
-	AND #(BTN_UP | BTN_DOWN)
-	BIT buttons
-	BEQ no_mode_change
-	LDA mode
-	EOR #MODE_ALL
-	STA mode
-	LDA #$03
-	JSR load_sfx
-no_mode_change:
-	JSR advance_audio
-	LDA prevbuttons
-	EOR #$FF
-	AND buttons
-	AND #(BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT)
-	BEQ real_check
-	LDX cheatpos
-	STA cheat,X
-	INX
-	TXA
-	AND #$0F
-	STA cheatpos
-real_check:
-	LDA prevbuttons
-	EOR #$FF
-	AND #BTN_SELECT
-	BIT buttons
-	BEQ no_cheat
-	JSR handle_cheat
-no_cheat:
+	LDA #$01
+	BIT mode
+	BNE lucid
+	JSR title_btn_normal
+	LDA #$FF
+	STA PLAYER_OAM
+	JMP mode_specific_handled
+lucid:	JSR title_btn_lucid
+	LDA #$8E
+	SEC
+	SBC deltay
+	SBC deltay
+	STA PLAYER_OAM
+	LDA #$11
+	STA PLAYER_OAM+1
+	LDA #$00
+	STA PLAYER_OAM+2
+	LDA deltat
+	ASL A
+	ASL A
+	CLC
+	ADC #$5A
+	STA PLAYER_OAM+3
+mode_specific_handled:
 	LDA prevbuttons
 	EOR #$FF
 	AND #(BTN_A | BTN_B | BTN_START)
@@ -300,9 +298,217 @@ sfxl:	JSR wait_vblank
 	DEX
 	BNE sfxl
 
+	LDA deltat
+	CLC
+	ADC #MINJUMPT
+	STA deltat
+	LDA deltay
+	CLC
+	ADC #MINJUMPY
+	STA deltay
+
 	JSR wait_vblank
 	JSR clear2000
 	JMP wait_vblank ; tail-call
+.endproc
+
+.proc arrows_maybe
+	LDA #$22
+	STA PPUADDR
+	LDA #$AF
+	STA PPUADDR
+	LDA #$01
+	BIT mode
+	BEQ up
+	LDY #$00
+	BEQ write
+up:	LDY #$27
+write:	STY PPUDATA
+	LDA #$23
+	STA PPUADDR
+	LDA #$2F
+	STA PPUADDR
+	LDA #$01
+	BIT mode
+	BEQ down
+	LDY #$00
+	BEQ write2
+down:	LDY #$28
+write2:	STY PPUDATA
+	RTS
+.endproc
+
+.proc title_btn_normal
+	LDA prevbuttons
+	EOR #$FF
+	AND #(BTN_UP | BTN_DOWN)
+	BIT buttons
+	BEQ no_mode_change
+	LDA mode
+	EOR #MODE_ALL
+	STA mode
+	LDA #$03
+	JSR load_sfx
+no_mode_change:
+	JMP tryforcheat ; tail-call
+.endproc
+
+.proc title_btn_lucid
+	DEC temp
+	BMI expired
+	JMP nonexpired
+expired:
+	INC temp
+
+	LDY #$06
+	LDA #BTN_UP
+	BIT buttons
+	BEQ no_up
+	LDA deltay
+	CLC
+	ADC #$01
+	AND #$1F
+	STA deltay
+	STY temp
+	LDA #$03
+	JSR load_sfx
+no_up:
+	LDA #BTN_DOWN
+	BIT buttons
+	BEQ no_down
+	LDA deltay
+	SEC
+	SBC #$01
+	AND #$1F
+	STA deltay
+	STY temp
+	LDA #$03
+	JSR load_sfx
+no_down:
+	LDA #BTN_LEFT
+	BIT buttons
+	BEQ no_left
+	LDA deltat
+	SEC
+	SBC #$01
+	AND #$0F
+	STA deltat
+	STY temp
+	LDA #$03
+	JSR load_sfx
+no_left:
+	LDA #BTN_RIGHT
+	BIT buttons
+	BEQ no_right
+	LDA deltat
+	CLC
+	ADC #$01
+	AND #$0F
+	STA deltat
+	STY temp
+	LDA #$03
+	JSR load_sfx
+no_right:
+nonexpired:
+	JMP tryforcheat ; tail-call
+.endproc
+
+.proc tryforcheat
+	LDA prevbuttons
+	EOR #$FF
+	AND buttons
+	AND #(BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT)
+	BEQ real_check
+	LDX cheatpos
+	STA cheat,X
+	INX
+	TXA
+	AND #$0F
+	STA cheatpos
+real_check:
+	LDA prevbuttons
+	EOR #$FF
+	AND #BTN_SELECT
+	BIT buttons
+	BEQ no_select
+	LDA #$03
+	JSR load_sfx
+	JSR handle_cheat
+	LDA mode
+	EOR #$01
+	STA mode
+	JSR arrows_maybe
+no_select:
+	RTS
+.endproc
+
+.proc lucidity_box
+	JSR wait_vblank
+	BIT PPUSTATUS
+	LDA #$21
+	STA PPUADDR
+	LDA #$6B
+	STA PPUADDR
+	LDY #$04
+	STY PPUDATA
+	INY
+	LDX #$07
+r1:	STY PPUDATA
+	DEX
+	BNE r1
+	INY
+	STY PPUDATA
+
+	LDA #$8B
+	STA write
+	LDA #$21
+	STA write + 1
+	LDA #$07
+	STA temp
+
+ro:	LDA #$03
+	BIT temp
+	BNE no_wait
+	JSR wait_vblank
+no_wait:
+	LDA write + 1
+	BIT PPUSTATUS
+	STA PPUADDR
+	LDA write
+	STA PPUADDR
+	LDY #$14
+	STY PPUDATA
+	INY
+	LDX #$07
+ri:	STY PPUDATA
+	DEX
+	BNE ri
+	INY
+	STY PPUDATA
+	LDA write
+	CLC
+	ADC #$20
+	STA write
+	BCC noinc
+	INC write + 1
+noinc:	DEC temp
+	BNE ro
+
+	BIT PPUSTATUS
+	LDA #$22
+	STA PPUADDR
+	LDA #$6B
+	STA PPUADDR
+	LDY #$24
+	STY PPUDATA
+	INY
+	LDX #$07
+r9:	STY PPUDATA
+	DEX
+	BNE r9
+	INY
+	STY PPUDATA
+	RTS
 .endproc
 
 .proc write_all
@@ -545,6 +751,18 @@ tstr:	LDA timerstr,Y
 	LDA #$10
 	STA PPUDATA
 nomedal:
+	LDA #$01
+	BIT mode
+	BEQ not_lucid
+	JSR wait_vblank
+	BIT PPUSTATUS
+	LDA #$21
+	STA PPUADDR
+	LDA #$0F
+	STA PPUADDR
+	LDA #$F4
+	STA PPUDATA
+not_lucid:
 	LDA #win_song
 	JSR load_song
 
@@ -703,6 +921,7 @@ game_over:
 .importzp mode
 .segment "ZEROPAGE"
 timerstr: .res 9
+write: .res 2
 .align 16
 cheat: .res 16
 cheatpos: .res 1

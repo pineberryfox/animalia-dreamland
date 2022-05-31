@@ -13,8 +13,6 @@
 .export wait_vblank
 .proc wait_vblank
 	PHA
-	LDA #$FF
-	STA frame
 	LDA #$90
 	ORA camx
 	BIT PPUSTATUS
@@ -41,10 +39,6 @@ wait:	LDA ready
 	STA OAMDMA
 	INC ready
 
-	LDA frame
-	BMI end
-	INC $FF
-end:
 	;; start pulling
 	PLA
 	RTI
@@ -66,15 +60,10 @@ end:
 .export main
 .proc main
 	JSR init_apu
-	LDX #$00
-	STX mode
-	STX srandr
-	STX frame
-	STX camx
-	STX PPUMASK
-	LDY #$00
-	LDA #$00
-	JSR srand
+	LDX #$08 + MINJUMPT
+	STX deltat
+	LDX #$10 + MINJUMPY
+	STX deltay
 	LDX PPUSTATUS
 	LDX #$3f
 	STX PPUADDR
@@ -102,7 +91,7 @@ vblankwait: ; wait for another vblank before continuing
 
 	;; reshuffle the level list each time
 	;; without reinitializing
-	LDX last_level
+	LDX #last_level
 prefill:TXA
 	STA level_list,X
 	DEX
@@ -118,10 +107,31 @@ play_everything:
 	JMP mainloop
 .endproc
 
+.import ordered_levels
+.proc all_levels
+	LDA #$00
+	STA timer
+	STA timer + 1
+	STA timer + 2
+	STA all_level_progress
+
+lp:	LDX all_level_progress
+	LDA ordered_levels,X
+	CMP #$FF
+	BEQ win
+	JSR load_level
+	JSR maingame
+	CPY #$00
+	BEQ lp
+	INC all_level_progress
+	JMP lp
+win:	JMP winscreen
+.endproc
+
 .import level_list
 .proc threelevel
 	;; Fisher-Yates the level list
-	LDX last_level
+	LDX #last_level
 shuf:	INX
 	TXA
 	PHA
@@ -166,30 +176,8 @@ shuf:	INX
 	JSR load_level
 	JSR maingame
 	CPY #$00
-	BEQ lost
-	JMP winscreen ; tail-call, won't execute losescreen
+	BNE all_levels::win ; tail-call, won't execute losescreen
 lost:	JMP losescreen ; tail-call
-.endproc
-
-.import ordered_levels
-.proc all_levels
-	LDA #$00
-	STA timer
-	STA timer + 1
-	STA timer + 2
-	STA all_level_progress
-
-lp:	LDX all_level_progress
-	LDA ordered_levels,X
-	CMP #$FF
-	BEQ win
-	JSR load_level
-	JSR maingame
-	CPY #$00
-	BEQ lp
-	INC all_level_progress
-	JMP lp
-win:	JMP winscreen
 .endproc
 
 	;; maingame returns a Boolean for whether we won or not in Y
@@ -199,7 +187,6 @@ win:	JMP winscreen
 .proc maingame
 	LDA #$00
 	STA sfx_to_play
-	STA frame
 	JSR draw_player
 	JSR draw_crystals
 	JSR draw_dusts
@@ -250,8 +237,8 @@ end:	RTS
 .endproc
 
 	;; which level? the contents of A
-.importzp dusty
-.import last_level, levels
+.importzp dusty, last_level
+.import levels
 .import load_song
 .proc load_level
 	PHA
@@ -326,18 +313,26 @@ speciesd:
 	STA camx
 
 	;; assign jump duration deltat and height deltay
+	LDA #$01
+	BIT mode
+	BNE lucidy
 	JSR rand
 	AND #$1F
 	CLC
-	ADC #$42
+	ADC #MINJUMPY
 	STA deltay
+lucidy:	LDA deltay
 	STA dividend + 1
 
+	LDA #$01
+	BIT mode
+	BNE lucidt
 	JSR rand
 	AND #$0F
 	CLC
-	ADC #$28
+	ADC #MINJUMPT
 	STA deltat
+lucidt:	LDA deltat
 	;; find initial vertical velocity: v0 = deltay / (4 deltat)
 	LSR A
 	LSR A
@@ -526,7 +521,6 @@ mode: .res 1
 all_level_progress: .res 1
 sfx_to_play: .res 1
 ready: .res 1
-frame: .res 1
 timer: .res 3
 .exportzp ready, timer, sfx_to_play, mode
 .importzp buttons, level, player_base
