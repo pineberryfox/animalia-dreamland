@@ -184,15 +184,11 @@ lp:	JSR wait_vblank
 	STA PPUADDR
 	LDA #$EC
 	STA PPUADDR
-	LDX #$06
-	LDY #$2A
+	LDX #$07
+	LDY #$29
 tl:	STY PPUDATA
 	INY
-	CPY #$2C
-	BNE nospc
-	LDA #$20
-	STA PPUDATA
-nospc:	DEX
+	DEX
 	BNE tl
 	LDA #$21
 	STA PPUADDR
@@ -234,7 +230,7 @@ endtitleword:
 	STA PPUADDR
 	LDA #$AF
 	STA PPUADDR
-	LDY #$28
+	LDY #$27
 	STY PPUDATA
 	LDA #$23
 	STA PPUADDR
@@ -695,7 +691,7 @@ logomark:
 .asciiz "Pineberry"
 .asciiz "Fox"
 title_word:
-.asciiz "SOMNIORUM"
+.asciiz "DREAMLAND"
 three_levels_mode:
 .asciiz "Three Dreams"
 all_levels_mode:

@@ -14,7 +14,8 @@ helloworld.nes : lvextract.o levels.o endcards.o
 helloworld.nes : rand.o readjoy.o reset.o
 helloworld.nes : songs.o man.o western.o spider.o rumble.o shimmer.o
 helloworld.nes : tower.o bubble.o split.o wompwomp.o victory.o villain.o
-helloworld.nes : ladle.o
+helloworld.nes : ladle.o shelves.o swingy.o reach.o heroes.o possessor.o
+helloworld.nes : clouds.o cow.o
 
 audio.o : audio.asm constants.inc notes.inc
 collide.o : collide.asm constants.inc
@@ -46,3 +47,7 @@ wompwomp.o : wompwomp.asm notes.inc
 victory.o : victory.asm notes.inc
 villain.o : villain.asm notes.inc
 ladle.o : ladle.asm notes.inc
+shelves.o : shelves.asm notes.inc
+swingy.o : swingy.asm notes.inc
+reach.o : reach.asm notes.inc
+heroes.o : heroes.asm notes.inc

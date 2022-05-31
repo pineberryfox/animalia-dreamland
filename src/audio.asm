@@ -108,7 +108,7 @@ continue:
 	LDX temp
 	CPX #$7F
 	BNE playnote
-	LDA #$80
+	LDA #$90
 	LDX #$00
 playnote:
 	LDY #$00
