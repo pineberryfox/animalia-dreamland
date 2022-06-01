@@ -17,6 +17,7 @@
 .import possessor_pulse,possessor_tri
 .import clouds_pulse,clouds_tri
 .import cow_pulse,cow_tri
+.import goat_pulse,goat_tri
 
 .exportzp lose_song = <((lose_song_loc - melodies) / 2)
 .exportzp win_song  = <((win_song_loc  - melodies) / 2)
@@ -41,6 +42,7 @@ melodies:
 .word shelves_pulse ; wall of shelves
 .word possessor_pulse ; packed hat
 .word clouds_pulse ; cloudy peaks
+.word goat_pulse ; loafed goat
 	;; the last of the real level songs has to be guantlet
 .word villain_pulse ; guantlet
 lose_song_loc:
@@ -66,6 +68,7 @@ bass:
 .word shelves_tri ; wall of shelves
 .word possessor_tri ; packed hat
 .word clouds_tri ; cloudy peaks
+.word goat_tri ; loafed goat
 .word villain_tri ; guantlet
 .word wompwomp_tri ; lost
 .word victory_tri ; won

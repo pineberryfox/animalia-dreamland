@@ -13,7 +13,7 @@ animalia-dreamland.nes : audio.o player.o collide.o crystal.o dust.o
 animalia-dreamland.nes : lvextract.o levels.o endcards.o
 animalia-dreamland.nes : rand.o readjoy.o reset.o
 animalia-dreamland.nes : songs.o
-animalia-dreamland.nes : bubble.o clouds.o cow.o heroes.o
+animalia-dreamland.nes : bubble.o clouds.o cow.o goat.o heroes.o
 animalia-dreamland.nes : ladle.o man.o possessor.o reach.o
 animalia-dreamland.nes : rumble.o shelves.o shimmer.o spider.o
 animalia-dreamland.nes : split.o swingy.o tower.o victory.o
@@ -56,3 +56,4 @@ shelves.o : shelves.asm notes.inc
 swingy.o : swingy.asm notes.inc
 reach.o : reach.asm notes.inc
 heroes.o : heroes.asm notes.inc
+goat.o : goat.asm notes.inc

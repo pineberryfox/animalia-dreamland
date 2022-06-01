@@ -53,6 +53,9 @@ levels:
 .incbin "peaks.level"
 .byte "  Cloudy Peaks "
 
+.incbin "goat.level"
+.byte "  Loafed Goat  "
+
 end_of_real_levels:
 	;; then Gauntlet is a special level
 	;; which appears only in all-levels mode
@@ -72,7 +75,7 @@ fake_level_for_end:
 
 .export ordered_levels
 ordered_levels:
-.byte 0, 15, 8, 9, 5, 12, 2, 11, 7, 13, 4, 3, 10, 14, 1, 6
+.byte 0, 15, 8, 9, 5, 12, 2, 11, 7, 13, 4, 3, 10, 14, 16, 1, 6
 .byte (end_of_real_levels - levels)/48 ; Gauntlet
 .byte $FF ; sentinel
 
