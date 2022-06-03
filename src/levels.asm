@@ -65,8 +65,8 @@ end_of_real_levels:
 .export fake_level_for_end
 fake_level_for_end:
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $01, $80, $00, $00, $00, $00, $00, $00
-.byte $00, $00
+.byte $00, $00, $00, $00, $01, $80 ; we don't care about the rest
+	;; let it be garbage (read from the level order list!)
 
 
 	;; last_level is the zero-based index of the final real level.

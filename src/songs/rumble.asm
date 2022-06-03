@@ -34,7 +34,6 @@ rumble_pulse:
 	.byte CMD_SUSTAIN_ON, CMD_DECAY_OFF
 	.byte CMD_SHAPE, $0F
 	.byte Ab2, half
-	.byte CMD_SHAPE, $0F
 	.byte C3, 3
 	.byte CMD_SHAPE, $CF
 	.byte Db3, 1
@@ -52,11 +51,8 @@ rumble_pulse:
 	.byte Db3, 1
 	.byte CMD_SHAPE, $0F
 	.byte C3, 3
-	.byte CMD_SHAPE, $CF
 	.byte Db3, 1
-	.byte CMD_SHAPE, $0F
 	.byte C3, 3
-	.byte CMD_SHAPE, $CF
 	.byte Db3, 1
 	.byte CMD_JUMP
 	.word rumble_pulse

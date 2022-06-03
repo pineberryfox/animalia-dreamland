@@ -22,14 +22,10 @@ inner_victory:
 	.byte F4, quarter
 	.byte B4, quarter
 	.byte G4, half
-	.byte C4, 1
-	.byte B4, 1
-	.byte Bb4, 1
-	.byte A4, 1
-	.byte G4, 1
-	.byte E4, 1
-	.byte C3, 1
-	.byte C2, 1
+	.byte C4, 2
+	.byte G4, 2
+	.byte G3, 2
+	.byte C2, 2
 	.byte CMD_STOP
 
 victory_tri:
